@@ -1,0 +1,18 @@
+# IDE
+.idea
+
+# TS related
+node_modules
+.env
+dist
+log
+
+# NPM cache
+## uncomment if using NPM
+#package-lock.json
+
+## uncomment if using Yarn
+#yarn.lock
+
+## uncomment if using PNPM
+pnpm-lock.yaml
