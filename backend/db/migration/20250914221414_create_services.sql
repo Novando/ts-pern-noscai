@@ -6,7 +6,7 @@ CREATE TABLE IF NOT EXISTS services (
     duration_minutes INTEGER NOT NULL,
     buffer INTEGER NOT NULL,
 
-    CONSTRAINT fk_services_clinic_id FOREIGN KEY (clinic_id) REFERENCES clinics(id) ON DELETE CASCADE,
+    CONSTRAINT fk_services_clinic_id FOREIGN KEY (clinic_id) REFERENCES clinics(id) ON DELETE CASCADE
 );
 
 -- +migrator DOWN
