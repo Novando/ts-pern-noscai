@@ -1,6 +1,6 @@
 -- +migrator UP
 CREATE TABLE IF NOT EXISTS patients (
-    id BIGSERIAL PRIMARY KEY
+    id BIGSERIAL PRIMARY KEY,
     clinic_id BIGINT NOT NULL,
     name VARCHAR(255),
 
