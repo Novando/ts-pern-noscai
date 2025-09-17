@@ -85,7 +85,7 @@ async function migrateUp(db: Pool, migrationsDir: string) {
 async function migrateDown(db: Pool, migrationsDir: string) {
   try {
     console.log('Rolling back database migrations...');
-    const res = await db.query("SELECT version FROM node_migrators ORDER BY created_at ASC LIMIT 1")
+    const res = await db.query("SELECT version FROM node_migrators ORDER BY created_at DESC LIMIT 1")
     const version = res.rows[0].version
 
     const file = fs.readdirSync(migrationsDir)
