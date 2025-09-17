@@ -1,0 +1,16 @@
+### Create a new appointment
+POST http://localhost:3000/api/v1/appointments
+Content-Type: application/json
+X-Tenant-Id: 1  # Example tenant ID
+
+{
+  "doctorId": 1,
+  "patientId": 1,
+  "serviceId": 1,
+  "roomId": 1,
+  "startsAt": "2025-10-01T10:00:00.000Z"
+}
+
+### Cancel an appointment
+DELETE http://localhost:3000/api/v1/appointments/1
+X-Tenant-Id: 1  # Example tenant ID
