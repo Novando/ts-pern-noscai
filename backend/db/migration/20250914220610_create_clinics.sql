@@ -1,4 +1,6 @@
 -- +migrator UP
+CREATE EXTENSION IF NOT EXISTS btree_gist;
+
 CREATE TABLE IF NOT EXISTS clinics (
     id BIGSERIAL PRIMARY KEY,
     name VARCHAR(255) NOT NULL
@@ -6,3 +8,4 @@ CREATE TABLE IF NOT EXISTS clinics (
 
 -- +migrator DOWN
 DROP TABLE IF EXISTS clinics;
+DROP EXTENSION IF EXISTS btree_gist;
