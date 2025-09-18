@@ -1,0 +1,4 @@
+### Create a new appointment
+GET http://localhost:3000/v1/schedules/services/1?startDate=2025-09-19T00:00:00.000Z
+Content-Type: application/json
+X-Tenant-Id: 1  # Example tenant ID
