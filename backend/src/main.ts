@@ -4,6 +4,7 @@ import {Logger} from "./utils/logger.util";
 import {envConfig} from "./configs/config.config";
 import {startRest} from "./bootstraps/rest.bootstrap";
 import { defaultStorageMiddleware } from "./middlewares/default-storage.middleware";
+import {requestLoggerMiddleware} from "./middlewares/request-logger.middleware";
 
 async function main () {
   Logger.init('./log/logfile')
@@ -15,7 +16,8 @@ async function main () {
   app.use(express.json())
   app.use(cors())
   app.use(defaultStorageMiddleware)
-  app.use('/api', bootstrapRest)
+  app.use(requestLoggerMiddleware)
+  app.use('/v1', bootstrapRest)
 
   const server = app.listen(envConfig.app.port, () => {})
 
@@ -29,4 +31,4 @@ async function main () {
   })
 }
 
-await main()
+main()

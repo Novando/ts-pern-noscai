@@ -1,10 +1,16 @@
-import type {Dayjs} from "dayjs";
-
-
 export type CreateAppointmentParam = {
   doctorId: number
   patientId: number
   roomId: number
-  startsAt: Dayjs
-  endsAt: Dayjs
+  startsAt: Date
+  endsAt: Date
+}
+
+export type GetAppointmentsByServiceIdEntity = {
+  doctorId: number
+  roomId: number
+  timeRange: {
+    start: Date
+    end: Date
+  }
 }

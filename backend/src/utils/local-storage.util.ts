@@ -23,10 +23,14 @@ export function runWithStore<T>(store: Store, fn: () => T): T {
 }
 
 /**
- * Get all value from the current store by key
+ * Get all value from the current store by key, excluding pgTx
  */
-export function getAllAsyncLocalStorage(): Store | undefined  {
-  return asyncLocalStorage.getStore();
+export function getAllAsyncLocalStorage(): Omit<Store, 'pgTx'> | undefined  {
+  const store = asyncLocalStorage.getStore();
+  if (!store) return undefined;
+
+  const { pgTx, ...rest } = store;
+  return rest;
 }
 
 /**
