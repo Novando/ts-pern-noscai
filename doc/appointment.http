@@ -1,5 +1,5 @@
 ### Create a new appointment
-POST http://localhost:3000/api/v1/appointments
+POST http://localhost:3000/v1/appointments
 Content-Type: application/json
 X-Tenant-Id: 1  # Example tenant ID
 
@@ -12,5 +12,5 @@ X-Tenant-Id: 1  # Example tenant ID
 }
 
 ### Cancel an appointment
-DELETE http://localhost:3000/api/v1/appointments/1
+DELETE http://localhost:3000/v1/appointments/1
 X-Tenant-Id: 1  # Example tenant ID
