@@ -29,34 +29,32 @@ export class Logger {
     })
   }
 
-  private prependAsyncLocalStorage(...msgs: (string|number)[]): (string|number)[] {
-    if (!getAllAsyncLocalStorage()) return msgs
-
-    return [JSON.stringify(getAllAsyncLocalStorage()), ...msgs];
+  private jsonizeObject(...msgs: any) {
+    const newMsgs: any = []
+    for (const msg of msgs) {
+      if (typeof msg === 'object') {
+        newMsgs.push(JSON.stringify(msg))
+      } else {
+        newMsgs.push(msg)
+      }
+    }
+    return newMsgs
   }
 
   static init(filename: string) {
     Logger.instance = new Logger(filename)
   }
-  static debug(...msgs: (string|number)[]) {
-    Logger.instance.log.debug(Logger.instance.prependAsyncLocalStorage(...msgs).join(';'))
+  static debug(...msgs: any) {
+    Logger.instance.log.debug(this.instance.jsonizeObject(msgs))
   }
-  static info(...msgs: (string|number)[]) {
-    Logger.instance.log.info(Logger.instance.prependAsyncLocalStorage(...msgs).join(';'))
+  static info(...msgs: any) {
+    Logger.instance.log.info(this.instance.jsonizeObject(msgs))
   }
-  static warn(...msgs: (string|number)[]) {
-    Logger.instance.log.warn(Logger.instance.prependAsyncLocalStorage(...msgs).join(';'))
+  static warn(...msgs: any) {
+    Logger.instance.log.warn(this.instance.jsonizeObject(msgs))
   }
-  static error(...msgs: (string|number|Error)[]) {
-    const newMsgs: (string|number)[] = []
+  static error(...msgs: any) {
 
-    for (const msg of msgs) {
-      if (!['string','number'].includes(typeof msg)) {
-        newMsgs.push((msg as Error).message)
-      } else {
-        newMsgs.push(msg as (string|number));
-      }
-    }
-    Logger.instance.log.error(Logger.instance.prependAsyncLocalStorage(...newMsgs).join(';'))
+    Logger.instance.log.error(this.instance.jsonizeObject(msgs))
   }
 }

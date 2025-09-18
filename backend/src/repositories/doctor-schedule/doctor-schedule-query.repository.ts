@@ -21,3 +21,24 @@ export const doctorScheduleQueryCheckWorkingHour = `-- doctorScheduleQueryCheckW
   JOIN doctor_schedules ds ON ds.doctor_id = appt.doctor_id AND ds.day_of_week = $2
   WHERE (appt.appointment_start::time >= ds.starts_at AND appt.appointment_end::time <= ds.ends_at);
 `
+
+export const doctorScheduleQueryGetMultipleDoctorBusinessHoursByServiceId = `-- doctorScheduleQueryGetMultipleDoctorBusinessHoursByServiceId
+  SELECT 
+    ds.day_of_week AS day_of_week,
+    ds.starts_at AS starts_at,
+    ds.ends_at AS ends_at,
+    COALESCE(
+      json_agg(
+        json_build_object(
+          'starts_at', dsb.starts_at,
+          'ends_at', dsb.ends_at
+        )
+        ORDER BY dsb.starts_at
+      ) FILTER (WHERE dsb.id IS NOT NULL),
+      '[]'::json
+    ) AS breaks
+  FROM doctor_schedules ds
+  LEFT JOIN doctor_schedule_break_hours dsb ON ds.id = dsb.doctor_schedule_id
+  INNER JOIN doctor_services doc_ser ON ds.doctor_id = doc_ser.doctor_id AND doc_ser.service_id = $1
+  GROUP BY ds.id, ds.day_of_week, ds.starts_at, ds.ends_at
+`

@@ -32,24 +32,24 @@ export async function createAppointmentService(this: AppointmentService, param: 
       // Check clinic working hour
       await this.clinicScheduleRepository.checkWorkingHour({
         clinicId: param.clinicId,
-        startsAt: statsAt,
-        endsAt: endsAt,
+        startsAt: statsAt.toDate(),
+        endsAt: endsAt.toDate(),
         day: day,
       })
 
       // Check doctor working hour
       await this.doctorScheduleRepository.checkWorkingHour({
         doctorId: param.doctorId,
-        startsAt: statsAt,
-        endsAt: endsAt,
+        startsAt: statsAt.toDate(),
+        endsAt: endsAt.toDate(),
         day: day,
       })
 
       // Check room working hour
       const roomId = await this.roomScheduleRepository.getAvailableRoom({
         roomIds: doctorService.roomIds,
-        startsAt: statsAt,
-        endsAt: endsAt,
+        startsAt: statsAt.toDate(),
+        endsAt: endsAt.toDate(),
         day: day,
       })
 
@@ -57,12 +57,12 @@ export async function createAppointmentService(this: AppointmentService, param: 
       await this.appointmentRepository.createAppointment({
         doctorId: value.doctorId,
         patientId: value.patientId,
-        roomId: value.roomId,
-        startsAt: statsAt,
-        endsAt: endsAt,
+        roomId: roomId,
+        startsAt: statsAt.toDate(),
+        endsAt: endsAt.toDate(),
       })
 
-      return {message: 'Appointement created'}
+      return {message: 'Appointment created'}
     })
 
   } catch (e) {

@@ -1,5 +1,6 @@
 import type {Pool} from "pg";
-import {checkClinicWorkingHourRepository} from "./check-clinic-working-hour.repository";
+import {checkClinicBusinessHourRepository} from "./check-clinic-business-hour.repository";
+import {getClinicBusinessHoursRepository} from "./get-clinic-business-hours.repository";
 
 
 export class ClinicScheduleRepository{
@@ -7,5 +8,6 @@ export class ClinicScheduleRepository{
     protected readonly db: Pool
   ){}
 
-  checkWorkingHour = checkClinicWorkingHourRepository
+  checkWorkingHour = checkClinicBusinessHourRepository
+  getClinicBusinessHours = getClinicBusinessHoursRepository
 }

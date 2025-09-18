@@ -3,6 +3,5 @@ export type PostAppointmentDTOReq = {
   patientId: number
   serviceId: number
   clinicId: number
-  roomId: number
   startsAt: string
 }

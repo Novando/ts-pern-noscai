@@ -22,3 +22,24 @@ export const roomScheduleQueryCheckWorkingHour = `-- roomScheduleQueryCheckWorki
     )
   LIMIT 1
 `
+
+export const roomScheduleQueryGetMultipleRoomBusinessHoursByServiceId = `-- roomScheduleQueryGetMultipleRoomBusinessHoursByServiceId
+  SELECT 
+    rs.day_of_week AS day_of_week,
+    rs.starts_at AS starts_at,
+    rs.ends_at AS ends_at,
+    COALESCE(
+      json_agg(
+        json_build_object(
+          'starts_at', rsb.starts_at,
+          'ends_at', rsb.ends_at
+        )
+        ORDER BY rsb.starts_at
+      ) FILTER (WHERE rsb.id IS NOT NULL),
+      '[]'::json
+    ) AS breaks
+  FROM room_schedules rs
+  LEFT JOIN room_schedule_break_hours rsb ON rs.id = rsb.room_schedule_id
+  INNER JOIN services s ON rs.room_id = s.room_id WHERE s.id = $1
+  GROUP BY rs.id, rs.day_of_week, rs.starts_at, rs.ends_at
+`
