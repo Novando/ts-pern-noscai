@@ -8,14 +8,20 @@ CREATE TABLE IF NOT EXISTS clinics (
     name VARCHAR(255) NOT NULL
 );
 
+-- Rooms table
+CREATE TABLE IF NOT EXISTS rooms (
+    id BIGSERIAL PRIMARY KEY,
+    clinic_id BIGINT NOT NULL REFERENCES clinics(id) ON DELETE CASCADE,
+    name VARCHAR(100) NOT NULL
+);
+
 -- Services table
 CREATE TABLE IF NOT EXISTS services (
     id BIGSERIAL PRIMARY KEY,
-    room_id BIGINT NOT NULL,
+    room_id BIGINT NOT NULL REFERENCES rooms(id) ON DELETE CASCADE,
     name VARCHAR(255) NOT NULL,
     duration_minutes INTEGER NOT NULL,
-    buffer INTEGER NOT NULL,
-    CONSTRAINT fk_services_room_id FOREIGN KEY (room_id) REFERENCES rooms(id) ON DELETE CASCADE
+    buffer INTEGER NOT NULL
 );
 
 -- Doctors table
@@ -26,47 +32,32 @@ CREATE TABLE IF NOT EXISTS doctors (
 
 -- Doctor Services junction table
 CREATE TABLE IF NOT EXISTS doctor_services (
-    doctor_id BIGINT NOT NULL,
-    service_id BIGINT NOT NULL,
-    PRIMARY KEY (doctor_id, service_id),
-    CONSTRAINT fk_doctor_services_doctor_id FOREIGN KEY (doctor_id) REFERENCES doctors(id) ON DELETE CASCADE,
-    CONSTRAINT fk_doctor_services_service_id FOREIGN KEY (service_id) REFERENCES services(id) ON DELETE CASCADE
+    doctor_id BIGINT NOT NULL REFERENCES doctors(id) ON DELETE CASCADE,
+    service_id BIGINT NOT NULL REFERENCES services(id) ON DELETE CASCADE,
+    PRIMARY KEY (doctor_id, service_id)
 );
 
 -- Patients table
 CREATE TABLE IF NOT EXISTS patients (
     id BIGSERIAL PRIMARY KEY,
-    clinic_id BIGINT NOT NULL,
-    name VARCHAR(255),
-    CONSTRAINT fk_patients_clinic_id FOREIGN KEY (clinic_id) REFERENCES clinics(id) ON DELETE CASCADE
-);
-
--- Rooms table
-CREATE TABLE IF NOT EXISTS rooms (
-    id BIGSERIAL PRIMARY KEY,
-    clinic_id BIGINT NOT NULL,
-    name VARCHAR(100) NOT NULL,
-    CONSTRAINT fk_rooms_clinic_id FOREIGN KEY (clinic_id) REFERENCES clinics(id) ON DELETE CASCADE
+    clinic_id BIGINT NOT NULL REFERENCES clinics(id) ON DELETE CASCADE,
+    name VARCHAR(255)
 );
 
 -- Devices table
 CREATE TABLE IF NOT EXISTS devices (
     id BIGSERIAL PRIMARY KEY,
-    clinic_id BIGINT NOT NULL,
-    name VARCHAR(100) NOT NULL,
-    CONSTRAINT fk_devices_clinic_id FOREIGN KEY (clinic_id) REFERENCES clinics(id) ON DELETE CASCADE
+    clinic_id BIGINT NOT NULL REFERENCES clinics(id) ON DELETE CASCADE,
+    name VARCHAR(100) NOT NULL
 );
 
 -- Appointments table
 CREATE TABLE IF NOT EXISTS appointments (
     id BIGSERIAL PRIMARY KEY,
-    doctor_id BIGINT NOT NULL,
-    patient_id BIGINT NOT NULL,
-    room_id BIGINT NOT NULL,
+    doctor_id BIGINT NOT NULL REFERENCES doctors(id) ON DELETE CASCADE,
+    patient_id BIGINT NOT NULL REFERENCES patients(id) ON DELETE CASCADE,
+    room_id BIGINT NOT NULL REFERENCES rooms(id) ON DELETE CASCADE,
     time_range TSTZRANGE NOT NULL,
-    CONSTRAINT fk_appointment_doctor_id FOREIGN KEY (doctor_id) REFERENCES doctors(id) ON DELETE CASCADE,
-    CONSTRAINT fk_appointment_patient_id FOREIGN KEY (patient_id) REFERENCES patients(id) ON DELETE CASCADE,
-    CONSTRAINT fk_appointment_room_id FOREIGN KEY (room_id) REFERENCES rooms(id) ON DELETE CASCADE,
     CONSTRAINT chk_appointments_doctor_id_time_range EXCLUDE USING GIST (doctor_id WITH =, time_range WITH &&),
     CONSTRAINT chk_appointments_patient_id_time_range EXCLUDE USING GIST (patient_id WITH =, time_range WITH &&),
     CONSTRAINT chk_appointments_room_id_time_range EXCLUDE USING GIST (room_id WITH =, time_range WITH &&)
@@ -75,61 +66,52 @@ CREATE TABLE IF NOT EXISTS appointments (
 -- Clinic Schedules table
 CREATE TABLE IF NOT EXISTS clinic_schedules (
     id BIGSERIAL PRIMARY KEY,
-    clinic_id BIGINT NOT NULL,
+    clinic_id BIGINT NOT NULL REFERENCES clinics(id) ON DELETE CASCADE,
     day_of_week INT NOT NULL CHECK (day_of_week BETWEEN 0 AND 6),
     starts_at TIME WITH TIME ZONE NOT NULL,
-    ends_at TIME WITH TIME ZONE NOT NULL,
-    CONSTRAINT fk_clinic_schedules_clinic_id FOREIGN KEY (clinic_id) REFERENCES clinics(id) ON DELETE CASCADE
+    ends_at TIME WITH TIME ZONE NOT NULL
 );
 
 -- Clinic Schedule Break Hours table
 CREATE TABLE IF NOT EXISTS clinic_schedule_break_hours (
     id BIGSERIAL PRIMARY KEY,
-    clinic_schedule_id BIGINT NOT NULL,
+    clinic_schedule_id BIGINT NOT NULL REFERENCES clinic_schedules(id) ON DELETE CASCADE,
     starts_at TIME WITH TIME ZONE NOT NULL,
-    ends_at TIME WITH TIME ZONE NOT NULL,
-    CONSTRAINT fk_clinic_schedule_break_hours_schedule_id FOREIGN KEY (clinic_schedule_id)
-        REFERENCES clinic_schedules(id) ON DELETE CASCADE
+    ends_at TIME WITH TIME ZONE NOT NULL
 );
 
 -- Doctor Schedules table
 CREATE TABLE IF NOT EXISTS doctor_schedules (
     id BIGSERIAL PRIMARY KEY,
-    doctor_id BIGINT NOT NULL,
+    doctor_id BIGINT NOT NULL REFERENCES doctors(id) ON DELETE CASCADE,
     day_of_week INT NOT NULL CHECK (day_of_week BETWEEN 0 AND 6),
     starts_at TIME WITH TIME ZONE NOT NULL,
-    ends_at TIME WITH TIME ZONE NOT NULL,
-    CONSTRAINT fk_doctor_schedules_doctor_id FOREIGN KEY (doctor_id) REFERENCES doctors(id) ON DELETE CASCADE
+    ends_at TIME WITH TIME ZONE NOT NULL
 );
 
 -- Doctor Schedule Break Hours table
 CREATE TABLE IF NOT EXISTS doctor_schedule_break_hours (
     id BIGSERIAL PRIMARY KEY,
-    doctor_schedule_id BIGINT NOT NULL,
+    doctor_schedule_id BIGINT NOT NULL REFERENCES doctor_schedules(id) ON DELETE CASCADE,
     starts_at TIME WITH TIME ZONE NOT NULL,
-    ends_at TIME WITH TIME ZONE NOT NULL,
-    CONSTRAINT fk_doctor_schedule_break_hours_schedule_id FOREIGN KEY (doctor_schedule_id)
-        REFERENCES doctor_schedules(id) ON DELETE CASCADE
+    ends_at TIME WITH TIME ZONE NOT NULL
 );
 
 -- Room Schedules table
 CREATE TABLE IF NOT EXISTS room_schedules (
     id BIGSERIAL PRIMARY KEY,
-    room_id BIGINT NOT NULL,
+    room_id BIGINT NOT NULL REFERENCES rooms(id) ON DELETE CASCADE,
     day_of_week INT NOT NULL CHECK (day_of_week BETWEEN 0 AND 6),
     starts_at TIME WITH TIME ZONE NOT NULL,
-    ends_at TIME WITH TIME ZONE NOT NULL,
-    CONSTRAINT fk_room_schedules_room_id FOREIGN KEY (room_id) REFERENCES rooms(id) ON DELETE CASCADE
+    ends_at TIME WITH TIME ZONE NOT NULL
 );
 
 -- Room Schedule Break Hours table
 CREATE TABLE IF NOT EXISTS room_schedule_break_hours (
     id BIGSERIAL PRIMARY KEY,
-    room_schedule_id BIGINT NOT NULL,
+    room_schedule_id BIGINT NOT NULL REFERENCES room_schedules(id) ON DELETE CASCADE,
     starts_at TIME WITH TIME ZONE NOT NULL,
-    ends_at TIME WITH TIME ZONE NOT NULL,
-    CONSTRAINT fk_room_schedule_break_hours_schedule_id FOREIGN KEY (room_schedule_id)
-        REFERENCES room_schedules(id) ON DELETE CASCADE
+    ends_at TIME WITH TIME ZONE NOT NULL
 );
 
 -- Create indexes for better query performance

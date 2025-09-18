@@ -112,7 +112,7 @@ Content-Type: application/json
   "service_id": 7,
   "room_id": 12,
   "device_ids": [3],
-  "starts_at": "2025-09-15T09:30:00+02:00"
+  "starts_at": "2025-09-15T09:30:00+02"
 }
 ```
 
@@ -121,8 +121,8 @@ Content-Type: application/json
 ```json
 {
   "id": 9876,
-  "starts_at": "2025-09-15T09:30:00+02:00",
-  "ends_at": "2025-09-15T10:15:00+02:00",
+  "starts_at": "2025-09-15T09:30:00+02",
+  "ends_at": "2025-09-15T10:15:00+02",
   "buffer_before_min": 5,
   "buffer_after_min": 10
 }
