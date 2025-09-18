@@ -1,0 +1,9 @@
+-- +migrator UP
+CREATE TABLE IF NOT EXISTS rooms (
+    id BIGSERIAL PRIMARY KEY,
+    clinic_id BIGINT NOT NULL REFERENCES clinics(id) ON DELETE CASCADE,
+    name VARCHAR(100) NOT NULL
+);
+
+-- +migrator DOWN
+DROP TABLE IF EXISTS rooms;
