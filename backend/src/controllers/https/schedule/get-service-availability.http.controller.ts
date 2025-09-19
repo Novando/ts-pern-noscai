@@ -10,15 +10,15 @@ export async function getServiceAvailabilityHttpController(this: ScheduleHttpCon
     const serviceId = parseInt(req.params.id || '0');
     const clinicId = getAsyncLocalStorage('tenantId') as number
 
-    // Default to next 7 days
-    const startDate = dayjs(req.query.startDate as string).isValid()
-      ? dayjs(req.query.startDate as string).toDate()
-      : dayjs().toDate();
+    // Default to now
+    const selectedTime = req.query.selectedTime && dayjs(req.query.selectedTime as string).isValid()
+      ? new Date(req.query.startDate as string)
+      : new Date();
 
     const availability = await this.scheduleService.searchAvailability({
       serviceId,
       clinicId,
-      startDate,
+      selectedTime,
     })
 
     res.status(constants.HTTP_STATUS_OK).json(standardResponse(availability));
