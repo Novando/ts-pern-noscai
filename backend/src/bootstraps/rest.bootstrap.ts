@@ -10,6 +10,9 @@ import {ScheduleService} from "../services/schedule/schedule.service";
 import {AppointmentService} from "../services/appointment/appointment.service";
 import {ScheduleHttpController} from "../controllers/https/schedule/schedule.http.controller";
 import {AppointmentHttpController} from "../controllers/https/appointment/appointment.http.controller";
+import {ClinicHttpController} from "../controllers/https/clinic/clinic.http.controller";
+import {ClinicService} from "../services/clinic/clinic.service";
+import {ClinicRepository} from "../repositories/clinic/clinic.repository";
 
 export async function startRest(): Promise<express.Router> {
   const pg = await initPg()
@@ -20,16 +23,36 @@ export async function startRest(): Promise<express.Router> {
   const roomScheduleRepo = new RoomScheduleRepository(pg)
   const appointmentRepo = new AppointmentRepository(pg)
   const doctorServiceRepo = new DoctorServiceRepository(pg)
+  const clinicRepo = new ClinicRepository(pg)
 
   // Service
-  const scheduleSvc = new ScheduleService(pg, clinicScheduleRepo, doctorScheduleRepo, roomScheduleRepo, appointmentRepo)
-  const appointmentSvc = new AppointmentService(pg, doctorServiceRepo, roomScheduleRepo, doctorScheduleRepo, clinicScheduleRepo, appointmentRepo)
+  const scheduleSvc = new ScheduleService({
+    db: pg,
+    clinicScheduleRepository: clinicScheduleRepo,
+    doctorScheduleRepository: doctorScheduleRepo,
+    roomScheduleRepository: roomScheduleRepo,
+    appointmentRepository: appointmentRepo,
+  })
+  const appointmentSvc = new AppointmentService({
+    db: pg,
+    doctorServiceRepository: doctorServiceRepo,
+    appointmentRepository: appointmentRepo,
+    roomScheduleRepository: roomScheduleRepo,
+    doctorScheduleRepository: doctorScheduleRepo,
+    clinicScheduleRepository: clinicScheduleRepo,
+  })
+  const clinicSvc = new ClinicService(clinicRepo)
 
   // Controller
   const schedulerCtrl = new ScheduleHttpController(scheduleSvc)
   const appointmentCtrl = new AppointmentHttpController(appointmentSvc)
+  const clinicCtrl = new ClinicHttpController(clinicSvc)
 
-  const router = new RouteHttpController(appointmentCtrl, schedulerCtrl)
+  const router = new RouteHttpController({
+    appointmentController: appointmentCtrl,
+    scheduleController: schedulerCtrl,
+    clinicController: clinicCtrl,
+  })
 
   return router.getRouter();
 }
