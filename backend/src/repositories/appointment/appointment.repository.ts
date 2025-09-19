@@ -1,6 +1,6 @@
 import type {Pool} from "pg";
 import {createAppointmentRepository} from "./create-appointment.repository";
-import {getAppointmentByServiceIdRepository} from "./get-appointments-by-service-id.repository.ts";
+import {getAppointmentByServiceIdAndClinicIdRepository} from "./get-appointments-by-service-id-and-clinic-id.repository";
 
 export class AppointmentRepository {
   constructor(
@@ -8,5 +8,5 @@ export class AppointmentRepository {
   ){}
 
   createAppointment = createAppointmentRepository
-  getAppointmentByServiceId= getAppointmentByServiceIdRepository
+  getAppointmentByServiceId= getAppointmentByServiceIdAndClinicIdRepository
 }

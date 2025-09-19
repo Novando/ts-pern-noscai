@@ -6,21 +6,30 @@ import type {AppointmentRepository} from "../../repositories/appointment/appoint
 import type {Pool} from "pg";
 
 
-type Appointment = {
-  doctorId: number;
-  roomId: number;
-  timeRange: { start: Date; end: Date };
+type Constructor = {
+  db: Pool
+  clinicScheduleRepository: ClinicScheduleRepository
+  doctorScheduleRepository: DoctorScheduleRepository
+  roomScheduleRepository: RoomScheduleRepository
+  appointmentRepository: AppointmentRepository
 };
 
 export class ScheduleService {
-  constructor(
-    protected readonly db: Pool,
+  protected readonly db: Pool
+  protected readonly clinicScheduleRepository: ClinicScheduleRepository
+  protected readonly doctorScheduleRepository: DoctorScheduleRepository
+  protected readonly roomScheduleRepository: RoomScheduleRepository
+  protected readonly appointmentRepository: AppointmentRepository
 
-    protected readonly clinicScheduleRepository: ClinicScheduleRepository,
-    protected readonly doctorScheduleRepository: DoctorScheduleRepository,
-    protected readonly roomScheduleRepository: RoomScheduleRepository,
-    protected readonly appointmentRepository: AppointmentRepository,
-  ) {}
+  constructor(
+    param: Constructor
+  ) {
+    this.db = param.db
+    this.clinicScheduleRepository = param.clinicScheduleRepository
+    this.doctorScheduleRepository = param.doctorScheduleRepository
+    this.roomScheduleRepository = param.roomScheduleRepository
+    this.appointmentRepository = param.appointmentRepository
+  }
 
   searchAvailability = searchAvailabilityService
 }

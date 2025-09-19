@@ -4,7 +4,7 @@ import {appointmentQueryGetAppointmentsByServiceId} from "./appointment-query.re
 import type {GetAppointmentsByServiceIdEntity} from "../../models/entity/appointment.entity";
 
 
-export async function getAppointmentByServiceIdRepository(this: AppointmentRepository, serviceId: number, startAt: Date, endAt: Date): Promise<GetAppointmentsByServiceIdEntity[]> {
+export async function getAppointmentByServiceIdAndClinicIdRepository(this: AppointmentRepository, serviceId: number, startAt: Date, endAt: Date): Promise<GetAppointmentsByServiceIdEntity[]> {
   const db = getAsyncLocalStorage('pgTx') ?? this.db;
 
   const res = await db.query(

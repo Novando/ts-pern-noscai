@@ -6,17 +6,32 @@ import type {RoomScheduleRepository} from "../../repositories/room-schedule/room
 import type {DoctorScheduleRepository} from "../../repositories/doctor-schedule/doctor-schedule.repository";
 import {AppointmentRepository} from "../../repositories/appointment/appointment.repository";
 
+type Constructor = {
+  db: Pool
+  doctorServiceRepository: DoctorServiceRepository
+  roomScheduleRepository: RoomScheduleRepository
+  doctorScheduleRepository: DoctorScheduleRepository
+  clinicScheduleRepository: ClinicScheduleRepository
+  appointmentRepository: AppointmentRepository
+}
 
 export class AppointmentService {
-  constructor(
-    protected readonly db: Pool,
+  protected readonly db: Pool
+  protected readonly doctorServiceRepository: DoctorServiceRepository
+  protected readonly roomScheduleRepository: RoomScheduleRepository
+  protected readonly doctorScheduleRepository: DoctorScheduleRepository
+  protected readonly clinicScheduleRepository: ClinicScheduleRepository
+  protected readonly appointmentRepository: AppointmentRepository
 
-    protected readonly doctorServiceRepository: DoctorServiceRepository,
-    protected readonly roomScheduleRepository: RoomScheduleRepository,
-    protected readonly doctorScheduleRepository: DoctorScheduleRepository,
-    protected readonly clinicScheduleRepository: ClinicScheduleRepository,
-    protected readonly appointmentRepository: AppointmentRepository,
-  ) {}
+  constructor(param: Constructor) {
+    this.db = param.db
+    this.doctorServiceRepository = param.doctorServiceRepository
+    this.roomScheduleRepository = param.roomScheduleRepository
+    this.doctorScheduleRepository = param.doctorScheduleRepository
+    this.clinicScheduleRepository = param.clinicScheduleRepository
+    this.appointmentRepository = param.appointmentRepository
+  }
+
 
   createAppointment = createAppointmentService
 }
