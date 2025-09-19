@@ -1,0 +1,38 @@
+// Cookie expires in 7 days by default
+const DEFAULT_EXPIRES_DAYS = 7;
+
+export function setCookie(name: string, value: string, days = DEFAULT_EXPIRES_DAYS) {
+  const date = new Date();
+  date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
+  const expires = `expires=${date.toUTCString()}`;
+  document.cookie = `${name}=${value};${expires};path=/`;
+}
+
+export function getCookie(name: string): string | null {
+  const nameEQ = `${name}=`;
+  const ca = document.cookie.split(';');
+  for (let i = 0; i < ca.length; i++) {
+    let c = ca[i];
+    while (c.charAt(0) === ' ') c = c.substring(1, c.length);
+    if (c.indexOf(nameEQ) === 0) return c.substring(nameEQ.length, c.length);
+  }
+  return null;
+}
+
+export function deleteCookie(name: string) {
+  document.cookie = `${name}=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT;`;
+}
+
+export function getTenantIdFromCookie(): string | null {
+  if (typeof document === 'undefined') {
+    // Handle server-side rendering
+    return null;
+  }
+
+  const cookieValue = document.cookie
+    .split('; ')
+    .find(row => row.startsWith('tenantId='))
+    ?.split('=')[1];
+
+  return cookieValue || null;
+}
