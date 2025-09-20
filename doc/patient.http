@@ -1,0 +1,3 @@
+### Get all patients registered in the clinic
+GET http://localhost:3000/v1/patients
+X-Tenant-Id: 1  # Example tenant ID

@@ -1,3 +1,7 @@
 ### Get all services based on selected clinic
 GET http://localhost:3000/v1/services
-#X-Tenant-Id: 1  # Example tenant ID
+X-Tenant-Id: 1  # Example tenant ID
+
+### Get all doctor that handle the mentioned services
+GET http://localhost:3000/v1/services/1/doctors
+X-Tenant-Id: 1  # Example tenant ID
