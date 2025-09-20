@@ -5,6 +5,7 @@ import type {ClinicScheduleRepository} from "../../repositories/clinic-schedule/
 import type {RoomScheduleRepository} from "../../repositories/room-schedule/room-schedule.repository";
 import type {DoctorScheduleRepository} from "../../repositories/doctor-schedule/doctor-schedule.repository";
 import {AppointmentRepository} from "../../repositories/appointment/appointment.repository";
+import {cancelAppointmentService} from "./cancel-appointment.service";
 
 type Constructor = {
   db: Pool
@@ -34,4 +35,5 @@ export class AppointmentService {
 
 
   createAppointment = createAppointmentService
+  cancelAppointment = cancelAppointmentService
 }

@@ -5,56 +5,51 @@ import {withTx} from "../../utils/pg-tx.util";
 import Joi from "joi";
 import type {ScheduleEntity} from "../../models/entity/common.entity";
 import type {GetAppointmentsByServiceIdEntity} from "../../models/entity/appointment.entity";
-import {Logger} from "../../utils/logger.util";
 import dayjs from "dayjs";
 
 const schema = Joi.object<GetServiceAvailabilityDTOReq>({
   clinicId: Joi.number().min(1).required(),
   serviceId: Joi.number().min(1).required(),
-  startDate: Joi.date().required(),
+  doctorId: Joi.number().min(1).optional(),
+  selectedTime: Joi.date().required(),
 })
 
 export async function searchAvailabilityService(this: ScheduleService, param: GetServiceAvailabilityDTOReq): Promise<GetServiceAvailabilityDTORes[]> {
-  try {
-    await schema.validateAsync(param)
+  const {clinicId, serviceId, selectedTime, doctorId} = await schema.validateAsync(param)
 
-    return await withTx(this.db, async (): Promise<GetServiceAvailabilityDTORes[]> => {
-      const res: GetServiceAvailabilityDTORes[] = []
+  return await withTx(this.db, async (): Promise<GetServiceAvailabilityDTORes[]> => {
+    const res: GetServiceAvailabilityDTORes[] = []
 
-      // Get all schedules and appointments in parallel
-      const [clinicSchedules, doctorSchedules, roomSchedules, appointments] = await Promise.all([
-        this.clinicScheduleRepository.getClinicBusinessHours(param.clinicId),
-        this.doctorScheduleRepository.getMultipleDoctorBusinessHoursByServiceId(param.serviceId),
-        this.roomScheduleRepository.getMultipleRoomBusinessHoursByServiceId(param.serviceId),
-        this.appointmentRepository.getAppointmentByServiceId(param.serviceId, param.startDate, dayjs(param.startDate).add(7, 'days').toDate())
-      ]);
+    // Get all schedules and appointments in parallel
+    const [clinicSchedules, doctorSchedules, roomSchedules, appointments] = await Promise.all([
+      this.clinicScheduleRepository.getClinicBusinessHours(clinicId),
+      this.doctorScheduleRepository.getMultipleDoctorBusinessHoursByServiceId(serviceId, clinicId, doctorId),
+      this.roomScheduleRepository.getMultipleRoomBusinessHoursByServiceId(serviceId),
+      this.appointmentRepository.getAppointmentByServiceId(serviceId, clinicId, selectedTime, dayjs(param.selectedTime).add(7, 'days').toDate())
+    ]);
 
-      // Group schedules by day of week
-      const schedulesByDay = groupSchedulesByDay(
-        clinicSchedules,
-        doctorSchedules.flat(),
-        roomSchedules
-      );
+    // Group schedules by day of week
+    const schedulesByDay = groupSchedulesByDay(
+      clinicSchedules,
+      doctorSchedules.flat(),
+      roomSchedules
+    );
 
-      // Group appointments by day of week
-      const appointmentsByDay = groupAppointmentsByDay(appointments);
+    // Group appointments by day of week
+    const appointmentsByDay = groupAppointmentsByDay(appointments);
 
-      // Calculate available time slots for each day
-      for (let day = 0; day < 7; day++) {
-        const daySchedules = schedulesByDay[day] || [];
-        const dayAppointments = appointmentsByDay[day] || [];
-        res.push({
-          date: dayjs(param.startDate).add(day, 'days').toDate(),
-          timeSlots: calculateAvailableSlots(daySchedules, dayAppointments)
-        })
-      }
+    // Calculate available time slots for each day
+    for (let day = 0; day < 7; day++) {
+      const daySchedules = schedulesByDay[day] || [];
+      const dayAppointments = appointmentsByDay[day] || [];
+      res.push({
+        date: dayjs(selectedTime).add(day, 'days').toDate(),
+        timeSlots: calculateAvailableSlots(daySchedules, dayAppointments)
+      })
+    }
 
-      return res
-    })
-  } catch (e) {
-    Logger.error(e as Error)
-    throw e
-  }
+    return res
+  })
 }
 
 function groupSchedulesByDay(
@@ -104,70 +99,94 @@ function calculateAvailableSlots(
 ): TimeSlotDTORes[] {
   if (schedules.length === 0) return []
 
-  // Find the common time range from all schedules (assuming all schedules are for the same day)
-  const daySchedule = schedules[0] as ScheduleEntity; // Since we're grouping by day, we can take the first schedule
+  // Process each schedule separately to maintain doctor information
+  const allSlots: TimeSlotDTORes[] = [];
 
-  // Initialize available slots with the full day schedule
-  const availableSlots: TimeSlotDTORes[] = [{
-    starts: daySchedule.startsAt,
-    ends: daySchedule.endsAt
-  }];
+  for (const schedule of schedules) {
+    // Initialize available slots with the schedule's time range
+    let availableSlots: TimeSlotDTORes[] = [{
+      starts: schedule.startsAt,
+      ends: schedule.endsAt,
+      doctorName: schedule.doctorName || ''
+    }];
 
-  // Process breaks from all schedules
-  const allBreaks = schedules.flatMap(schedule =>
-    schedule.breaks?.map(brk => ({
-      starts: brk.startsAt,
-      ends: brk.endsAt
-    })) || []
-  );
+    // Process breaks for this schedule
+    if (schedule.breaks) {
+      for (const brk of schedule.breaks) {
+        const newSlots: TimeSlotDTORes[] = [];
+        for (const slot of availableSlots) {
+          // If the break doesn't overlap with this slot, keep it as is
+          if (brk.endsAt <= slot.starts || brk.startsAt >= slot.ends) {
+            newSlots.push(slot);
+            continue;
+          }
 
-  // Process appointments
-  const appointmentSlots = appointments.map(appt => ({
-    starts: appt.timeRange.start,
-    ends: appt.timeRange.end
-  }));
+          // If the break completely covers this slot, remove it
+          if (brk.startsAt <= slot.starts && brk.endsAt >= slot.ends) {
+            continue;
+          }
 
-  // Combine breaks and appointments
-  const blockedSlots = [...allBreaks, ...appointmentSlots]
-    .sort((a, b) => a.starts.valueOf() - b.starts.valueOf());
-
-  // Split available slots based on blocked times
-  for (const blocked of blockedSlots) {
-    const newSlots: TimeSlotDTORes[] = [];
-
-    for (const slot of availableSlots) {
-      // If the blocked time doesn't overlap with this slot, keep it as is
-      if (blocked.ends <= slot.starts || blocked.starts >= slot.ends) {
-        newSlots.push(slot);
-        continue;
-      }
-
-      // If the blocked time completely covers this slot, remove it
-      if (blocked.starts <= slot.starts && blocked.ends >= slot.ends) {
-        continue;
-      }
-
-      // If the blocked time is in the middle, split the slot
-      if (blocked.starts > slot.starts) {
-        newSlots.push({
-          starts: slot.starts,
-          ends: blocked.starts
-        });
-      }
-
-      if (blocked.ends < slot.ends) {
-        newSlots.push({
-          starts: blocked.ends,
-          ends: slot.ends
-        });
+          // If the break is in the middle, split the slot
+          if (brk.startsAt > slot.starts) {
+            newSlots.push({
+              starts: slot.starts,
+              ends: brk.startsAt,
+              doctorName: slot.doctorName
+            });
+          }
+          if (brk.endsAt < slot.ends) {
+            newSlots.push({
+              starts: brk.endsAt,
+              ends: slot.ends,
+              doctorName: slot.doctorName
+            });
+          }
+        }
+        availableSlots = newSlots;
       }
     }
 
-    availableSlots.length = 0;
-    availableSlots.push(...newSlots);
+    // Process appointments for this doctor
+    const doctorAppointments = appointments
+      .filter(a => a.doctorId === schedule.doctorId)
+      .sort((a, b) => a.timeRange.start.valueOf() - b.timeRange.start.valueOf());
+
+    for (const appt of doctorAppointments) {
+      const newSlots: TimeSlotDTORes[] = [];
+      for (const slot of availableSlots) {
+        // If the appointment doesn't overlap with this slot, keep it as is
+        if (appt.timeRange.end <= slot.starts || appt.timeRange.start >= slot.ends) {
+          newSlots.push(slot);
+          continue;
+        }
+
+        // If the appointment completely covers this slot, remove it
+        if (appt.timeRange.start <= slot.starts && appt.timeRange.end >= slot.ends) {
+          continue;
+        }
+
+        // If the appointment is in the middle, split the slot
+        if (appt.timeRange.start > slot.starts) {
+          newSlots.push({
+            starts: slot.starts,
+            ends: appt.timeRange.start,
+            doctorName: slot.doctorName
+          });
+        }
+        if (appt.timeRange.end < slot.ends) {
+          newSlots.push({
+            starts: appt.timeRange.end,
+            ends: slot.ends,
+            doctorName: slot.doctorName
+          });
+        }
+      }
+      availableSlots = newSlots;
+    }
+
+    allSlots.push(...availableSlots);
   }
 
-  return availableSlots
-    .filter(slot => dayjs(slot.starts).isBefore(slot.ends)) // Remove any invalid slots
-    .sort((a, b) => a.starts.valueOf() - b.starts.valueOf()) // Sort by start time
+  // Sort all slots by start time
+  return allSlots.sort((a, b) => a.starts.valueOf() - b.starts.valueOf());
 }
