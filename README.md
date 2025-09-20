@@ -40,9 +40,9 @@ docker-compose up --build
 ```
 
 This will start all services:
-- Frontend: http://localhost
-- Backend API: http://localhost:3000
-- API Documentation: http://localhost:3000/v1/api-docs
+- Frontend: http://localhost:3001
+- Backend API: http://localhost:3000/v1
+- API Documentation: http://localhost:3000/api-docs
 - PostgreSQL: localhost:5432
 
 ## Development

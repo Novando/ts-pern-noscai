@@ -16,7 +16,6 @@
 2. **Scheduling Logic**:
     - Room assignment is random based on doctor availability
     - Checking all working hours and break time of doctors, clinics and rooms.
-    - 
     - Limited conflict resolution for overlapping schedules (using constraint check in each doctor_services, rooms, patients, and time range)
 
 3. **Performance Considerations**:

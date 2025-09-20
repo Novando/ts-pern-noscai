@@ -16,7 +16,7 @@ async function main () {
 
   app.use(express.json())
   app.use(cors({
-    origin: ['http://localhost:8080'],
+    origin: ['http://localhost:3001', 'http://localhost:8080'],
     credentials: true,
     allowedHeaders: ['Content-Type', 'Authorization', 'X-Tenant-Id'],
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS']

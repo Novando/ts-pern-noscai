@@ -6,7 +6,7 @@
 	"type": "module",
 	"scripts": {
 		"build": "tsc",
-		"start": "node dist/main.js",
+		"start": "npm run migrate up && npm run migrate up seed && npm run dev",
 		"dev": "nodemon --watch 'src/**/*.ts' --exec 'tsx' src/main.ts",
 		"lint": "eslint 'src/**/*.ts' --fix",
 		"migrate": "tsx script/migrator",

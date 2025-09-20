@@ -30,26 +30,19 @@ services:
       db:
         condition: service_healthy
     environment:
-      - NODE_ENV=$NODE_ENV:-dev}
-      - APP_PORT=$APP_PORT:-3000}
-      - APP_NAME=$APP_NAME:-"clinic-backend"}
-      - PG_USER=$PG_USER:-postgres}
-      - PG_PASS=$PG_PASS:-postgres}
-      - PG_HOST=$PG_HOST:-clinic_db}
-      - PG_DB=$PG_DB:-clinic}
-      - PG_QUERY_TIMEOUT=$PG_QUERY_TIMEOUT:-30000}
-      - PG_LOCK_TIMEOUT=$PG_LOCK_TIMEOUT:-60000}
-      - PG_CONN_TIMEOUT=$PG_CONN_TIMEOUT:-300000}
-      - PG_IDLE_TX_TIMEOUT=$PG_IDLE_TX_TIMEOUT:-15000}
-      -
-      - NODE_ENV=production
-      - DATABASE_URL=postgresql://${DB_USER:-postgres}:${DB_PASSWORD:-postgres}@db:5432/${DB_NAME:-clinic}
-      - PORT=3000
+      - NODE_ENV=${NODE_ENV:-dev}
+      - APP_PORT=${APP_PORT:-3000}
+      - APP_NAME=${APP_NAME:-"clinic-backend"}
+      - PG_USER=${PG_USER:-postgres}
+      - PG_PASS=${PG_PASS:-postgres}
+      - PG_HOST=${PG_HOST:-clinic_db}
+      - PG_DB=${PG_DB:-clinic}
+      - PG_QUERY_TIMEOUT=${PG_QUERY_TIMEOUT:-30000}
+      - PG_LOCK_TIMEOUT=${PG_LOCK_TIMEOUT:-60000}
+      - PG_CONN_TIMEOUT=${PG_CONN_TIMEOUT:-300000}
+      - PG_IDLE_TX_TIMEOUT=${PG_IDLE_TX_TIMEOUT:-15000}
     ports:
       - "3000:3000"
-    volumes:
-      - ./backend:/app
-      - /app/node_modules
     networks:
       - clinic-network
 
@@ -62,9 +55,9 @@ services:
     depends_on:
       - backend
     ports:
-      - "3001:80"
+      - "3001:8080"
     environment:
-      - NEXT_PUBLIC_API_URL=http://clinic_backend:3000
+      - NEXT_PUBLIC_API_URL=http://localhost:3000/v1
     networks:
       - clinic-network
 
