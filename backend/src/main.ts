@@ -5,6 +5,7 @@ import {envConfig} from "./configs/config.config";
 import {startRest} from "./bootstraps/rest.bootstrap";
 import { defaultStorageMiddleware } from "./middlewares/default-storage.middleware";
 import {requestLoggerMiddleware} from "./middlewares/request-logger.middleware";
+import { setupSwagger } from './config/swagger-ui';
 
 async function main () {
   Logger.init('./log/logfile')
@@ -23,6 +24,8 @@ async function main () {
   app.use(defaultStorageMiddleware)
   app.use(requestLoggerMiddleware)
   app.use('/v1', bootstrapRest)
+
+  setupSwagger(app, '/api-docs');
 
   const server = app.listen(envConfig.app.port, () => {})
 

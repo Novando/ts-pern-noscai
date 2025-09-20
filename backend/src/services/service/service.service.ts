@@ -1,5 +1,6 @@
 import {getServiceByClinicIdService} from "./get-service-by-clinic-id.service";
 import type { ServiceRepository } from '../../repositories/service/service.repository';
+import {getDoctorsByServiceIdAndClinicIdService} from "./get-doctors-by-service-id.service";
 
 export class ServiceService {
   constructor(
@@ -7,4 +8,5 @@ export class ServiceService {
   ) {}
 
   getServicesByClinicId = getServiceByClinicIdService
+  getDoctorsByServiceIdAndClinicId = getDoctorsByServiceIdAndClinicIdService
 }

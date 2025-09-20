@@ -1,7 +1,6 @@
 import {Pool} from 'pg';
-import {serviceQueryGetServicesByClinicId} from "./service-query.repository";
-import type {ServiceEntity} from "../../models/entity/service.entity";
 import {getServiceByClinicIdRepository} from "./get-service-by-clinic-id.repository";
+import {getDoctorsByServiceIdAndClinicIdRepository} from "./get-doctors-by-service-id-and-clinic-id.repository";
 
 export class ServiceRepository {
   constructor(
@@ -9,4 +8,5 @@ export class ServiceRepository {
   ) {}
 
   getServicesByClinicId = getServiceByClinicIdRepository
+  getDoctorsByServiceIdAndClinicId = getDoctorsByServiceIdAndClinicIdRepository
 }

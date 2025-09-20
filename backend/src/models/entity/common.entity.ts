@@ -1,6 +1,6 @@
 export type ScheduleEntity = {
-  doctorId?: number;
-  doctorName?: string;
+  doctorId: number;
+  doctorName: string;
   dayOfWeek: number;
   startsAt: Date;
   endsAt: Date;
