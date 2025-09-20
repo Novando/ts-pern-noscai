@@ -5,16 +5,23 @@ import {doctorScheduleQueryGetMultipleDoctorBusinessHoursByServiceId} from "./do
 import {normalizeIsoDate} from "../../utils/time.util";
 
 
-export async function getMultipleDoctorBusinessHoursByServiceIdRepository(this: DoctorScheduleRepository, serviceId: number): Promise<ScheduleEntity[]> {
+export async function getMultipleDoctorBusinessHoursByServiceIdRepository(
+  this: DoctorScheduleRepository,
+  serviceId: number,
+  clinicId: number,
+  doctorId?: number,
+): Promise<ScheduleEntity[]> {
   const db = getAsyncLocalStorage('pgTx') ?? this.db;
 
   const res = await db.query(
-    doctorScheduleQueryGetMultipleDoctorBusinessHoursByServiceId,
-    [serviceId],
+    doctorScheduleQueryGetMultipleDoctorBusinessHoursByServiceId(doctorId ? ["AND s.id = $3"] : [""]),
+    [serviceId, clinicId, doctorId],
   )
   if (res.rows.length < 1) throw Error('Doctor schedule unavailable')
 
   return res.rows.map<ScheduleEntity>((item) => ({
+    doctorId: item.doctor_id,
+    doctorName: item.doctor_name,
     dayOfWeek: item.day_of_week,
     startsAt: new Date(normalizeIsoDate(`1970-01-01T${item.starts_at}`)),
     endsAt: new Date(normalizeIsoDate(`1970-01-01T${item.ends_at}`)),

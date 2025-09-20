@@ -1,4 +1,5 @@
 export type TimeSlotDTORes = {
+  doctorName: string
   starts: Date;
   ends: Date;
 }
