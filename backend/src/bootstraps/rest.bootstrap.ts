@@ -16,6 +16,9 @@ import {ClinicRepository} from "../repositories/clinic/clinic.repository";
 import {ServiceRepository} from "../repositories/service/service.repository";
 import {ServiceService} from "../services/service/service.service";
 import {ServiceHttpController} from "../controllers/https/service/service.http.controller";
+import {PatientHttpController} from "../controllers/https/patient/patient.http.controller";
+import {PatientService} from "../services/patient/patient.service";
+import {PatientRepository} from "../repositories/patient/patient.repository";
 
 export async function startRest(): Promise<express.Router> {
   const pg = await initPg()
@@ -28,6 +31,7 @@ export async function startRest(): Promise<express.Router> {
   const doctorServiceRepo = new DoctorServiceRepository(pg)
   const clinicRepo = new ClinicRepository(pg)
   const serviceRepo = new ServiceRepository(pg)
+  const patientRepo = new PatientRepository(pg)
 
   // Service
   const scheduleSvc = new ScheduleService({
@@ -47,18 +51,21 @@ export async function startRest(): Promise<express.Router> {
   })
   const clinicSvc = new ClinicService(clinicRepo)
   const serviceSvc = new ServiceService(serviceRepo)
+  const patientSvc = new PatientService(patientRepo)
 
   // Controller
   const schedulerCtrl = new ScheduleHttpController(scheduleSvc)
   const appointmentCtrl = new AppointmentHttpController(appointmentSvc)
   const clinicCtrl = new ClinicHttpController(clinicSvc)
   const serviceCtrl = new ServiceHttpController(serviceSvc)
+  const patientCtrl = new PatientHttpController(patientSvc)
 
   const router = new RouteHttpController({
     appointmentController: appointmentCtrl,
     scheduleController: schedulerCtrl,
     clinicController: clinicCtrl,
     serviceController: serviceCtrl,
+    patientController: patientCtrl,
   })
 
   return router.getRouter();

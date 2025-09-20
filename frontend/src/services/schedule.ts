@@ -11,13 +11,16 @@ export interface ServiceAvailabilityParams {
 export async function fetchServiceAvailability(
   params: ServiceAvailabilityParams
 ): Promise<AvailabilityApiResponse> {
-  const { serviceId, selectedTime } = params;
+  const { serviceId, selectedTime, doctorId } = params;
   
   try {
     const response = await api.get<AvailabilityApiResponse>(
       `/schedules/services/${serviceId}/availability`,
       {
-        params: selectedTime ? { selectedTime: selectedTime.toISOString() } : undefined,
+        params: {
+          selectedTime: selectedTime ? selectedTime.toISOString() : '',
+          doctorId: doctorId ? doctorId : '',
+        },
       }
     );
 

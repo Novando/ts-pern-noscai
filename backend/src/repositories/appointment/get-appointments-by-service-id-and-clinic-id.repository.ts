@@ -3,6 +3,7 @@ import type {AppointmentRepository} from "./appointment.repository";
 import {appointmentQueryGetAppointmentsByServiceId} from "./appointment-query.repository";
 import type {GetAppointmentsByServiceIdEntity} from "../../models/entity/appointment.entity";
 import {Logger} from "../../utils/logger.util";
+import {AppError} from "../../utils/error.util";
 
 
 export async function getAppointmentByServiceIdAndClinicIdRepository(
@@ -30,7 +31,8 @@ export async function getAppointmentByServiceIdAndClinicIdRepository(
       }
     }))
   } catch (e) {
-    Logger.error('getAppointmentByServiceIdAndClinicIdRepository', e)
+    Logger.error('getAppointmentByServiceIdAndClinicIdRepository', (e as Error).message)
+    if (!(e instanceof AppError)) throw new AppError((e as Error).message)
     throw e
   }
 }

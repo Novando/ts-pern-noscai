@@ -44,7 +44,6 @@ This will start all services:
 - Backend API: http://localhost:3000
 - API Documentation: http://localhost:3000/api-docs
 - PostgreSQL: localhost:5432
-- pgAdmin: http://localhost:5050 (optional)
 
 ## Development
 
@@ -125,9 +124,11 @@ Required environment variables are documented in `.env.example`. Make sure to se
 ```
 .
 ├── backend/               # Backend API server
+│   ├── db/                # Database migrations and seeds
+│   ├── init/              # Initialization scripts
 │   ├── src/
 │   │   ├── controllers/   # Request handlers
-│   │   ├── models/        # Database models
+│   │   ├── models/        # Database and DTO models
 │   │   ├── routes/        # API routes
 │   │   └── services/      # Business logic
 │   └── Dockerfile
@@ -137,8 +138,6 @@ Required environment variables are documented in `.env.example`. Make sure to se
 │   ├── src/               # Source files
 │   └── Dockerfile
 │
-├── db/                    # Database migrations and seeds
-│   └── init/              # Initialization scripts
 │
 ├── docker-compose.yml     # Development Docker Compose
 └── .env.example          # Example environment variables

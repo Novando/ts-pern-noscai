@@ -165,7 +165,7 @@ function groupAppointmentsByDay(appointments: GetAppointmentsByServiceIdEntity[]
 function calculateAvailableSlots(
   schedules: ScheduleEntity[],
   appointments: GetAppointmentsByServiceIdEntity[],
-  selectedDate: Date
+  selectedDate: Date,
 ): TimeSlotDTORes[] {
   const slots: TimeSlotDTORes[] = [];
   const selectedTime = dayjs(selectedDate);
@@ -209,9 +209,33 @@ function calculateAvailableSlots(
       });
 
       if (!isDuringBreak && !isBooked) {
+        // Get the next occurrence of the schedule's day of week after selectedTime
+        const scheduleDay = schedule.dayOfWeek; // 0-6 (Sunday-Saturday)
+        const selectedDayjs = dayjs(selectedDate);
+        
+        // Calculate the next occurrence of this day of week
+        let slotDate = selectedDayjs.day(scheduleDay);
+        if (slotDate.isBefore(selectedDayjs, 'day')) {
+          // If the day has already passed this week, get next week's date
+          slotDate = slotDate.add(1, 'week');
+        }
+        
+        // Combine the date with the time from the schedule
+        const startTime = dayjs(slotDate)
+          .hour(currentSlotStart.hour())
+          .minute(currentSlotStart.minute())
+          .second(currentSlotStart.second())
+          .toDate();
+          
+        const endTime = dayjs(slotDate)
+          .hour(slotEnd.hour())
+          .minute(slotEnd.minute())
+          .second(slotEnd.second())
+          .toDate();
+        
         slots.push({
-          starts: currentSlotStart.toDate(),
-          ends: slotEnd.toDate(),
+          starts: startTime,
+          ends: endTime,
           doctorName: schedule.doctorName,
         });
       }

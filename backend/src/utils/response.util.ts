@@ -1,4 +1,5 @@
 import type {Response} from "express";
+import {convertTz} from "./date-converter.util";
 
 export type WithMeta<T> = {
   data: T
@@ -15,6 +16,8 @@ export function standardResponse<T>(
   resCode: string = 'OK',
   message: string = 'Success',
 ) {
+  // @ts-ignore
+  value = convertTz(value)
   if (JSON.stringify(value).startsWith('[')) {
     value = {data: value} as {data: T[]}
   }

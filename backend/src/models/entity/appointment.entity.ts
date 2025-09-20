@@ -1,5 +1,5 @@
 export type CreateAppointmentParam = {
-  doctorId: number
+  doctorServiceId: number
   patientId: number
   roomId: number
   startsAt: Date

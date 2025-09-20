@@ -4,12 +4,14 @@ import {guardMiddleware} from "../../middlewares/guard.middleware";
 import type {ScheduleHttpController} from "./schedule/schedule.http.controller";
 import type {ClinicHttpController} from "./clinic/clinic.http.controller";
 import type {ServiceHttpController} from "./service/service.http.controller";
+import type {PatientHttpController} from "./patient/patient.http.controller";
 
 type Constructor = {
   appointmentController: AppointmentHttpController
   scheduleController: ScheduleHttpController
   clinicController: ClinicHttpController
   serviceController: ServiceHttpController
+  patientController: PatientHttpController
 }
 
 export class RouteHttpController {
@@ -27,6 +29,7 @@ export class RouteHttpController {
     this.router.get('/schedules/doctors/:id/booked', guardMiddleware, param.scheduleController.getDoctorBooked.bind(this.param.scheduleController)); // list doctor’s appointments for calendar view
     this.router.get('/services', guardMiddleware, param.serviceController.getServices.bind(this.param.serviceController))
     this.router.get('/services/:id/doctors', guardMiddleware, param.serviceController.getDoctors.bind(this.param.serviceController))
+    this.router.get('/patients', guardMiddleware, param.patientController.getPatients.bind(this.param.patientController))
   }
 
   getRouter(): express.Router {

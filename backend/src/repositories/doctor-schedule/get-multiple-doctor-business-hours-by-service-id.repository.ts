@@ -4,6 +4,8 @@ import type {DoctorScheduleRepository} from "./doctor-schedule.repository";
 import {doctorScheduleQueryGetMultipleDoctorBusinessHoursByServiceId} from "./doctor-schedule-query.repository";
 import {normalizeIsoDate} from "../../utils/time.util";
 import {Logger} from "../../utils/logger.util";
+import {AppError} from "../../utils/error.util";
+import {constants} from "http2";
 
 
 export async function getMultipleDoctorBusinessHoursByServiceIdRepository(
@@ -19,7 +21,7 @@ export async function getMultipleDoctorBusinessHoursByServiceIdRepository(
       doctorScheduleQueryGetMultipleDoctorBusinessHoursByServiceId(doctorId ? [`AND d.id = ${doctorId}`] : [""]),
       [serviceId, clinicId],
     )
-    if (res.rows.length < 1) throw Error('Doctor schedule unavailable')
+    if (res.rows.length < 1) throw new AppError('Doctor schedule unavailable', 'NOT_FOUND', constants.HTTP_STATUS_NOT_FOUND)
 
     return res.rows.map<ScheduleEntity>((item) => ({
       doctorId: item.doctor_id,
@@ -33,7 +35,8 @@ export async function getMultipleDoctorBusinessHoursByServiceIdRepository(
       }))
     }))
   } catch (e) {
-    Logger.error('getMultipleDoctorBusinessHoursByServiceIdRepository', e)
+    Logger.error('getMultipleDoctorBusinessHoursByServiceIdRepository', (e as Error).message)
+    if (!(e instanceof AppError)) throw new AppError((e as Error).message)
     throw e
   }
 }

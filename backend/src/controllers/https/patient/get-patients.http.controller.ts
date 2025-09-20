@@ -1,19 +1,19 @@
-import type { Request, Response } from 'express';
-import type {ServiceHttpController} from "./service.http.controller";
-import {getAsyncLocalStorage} from "../../../utils/local-storage.util";
-import {constants} from "http2";
-import {Logger} from "../../../utils/logger.util";
-import {standardResponse} from "../../../utils/response.util";
-import {standardErrorResponse} from "../../../utils/error.util";
+import { getAsyncLocalStorage } from "../../../utils/local-storage.util";
+import { standardResponse } from "../../../utils/response.util";
+import { Logger } from "../../../utils/logger.util";
+import { standardErrorResponse } from "../../../utils/error.util";
+import { constants } from "http2";
+import type { Request, Response } from "express";
+import type { PatientHttpController } from "./patient.http.controller";
 
 /**
  * @swagger
- * /services:
+ * /patients:
  *   get:
  *     tags:
- *       - Services
- *     summary: Get all services
- *     description: Retrieves a list of all services available in the current clinic
+ *       - Patients
+ *     summary: Get all patients
+ *     description: Retrieves a list of all patients for the current clinic
  *     security:
  *       - bearerAuth: []
  *     parameters:
@@ -25,7 +25,7 @@ import {standardErrorResponse} from "../../../utils/error.util";
  *         description: Numeric ID of the tenant
  *     responses:
  *       '200':
- *         description: A list of services
+ *         description: A list of patients
  *         content:
  *           application/json:
  *             schema:
@@ -44,26 +44,26 @@ import {standardErrorResponse} from "../../../utils/error.util";
  *                     properties:
  *                       id:
  *                         type: integer
- *                         description: Unique identifier for the service
+ *                         description: Unique identifier for the patient
  *                         example: 1
  *                       name:
  *                         type: string
- *                         description: Name of the service
- *                         example: "General Checkup"
+ *                         description: Name of the patient
+ *                         example: "Mr. Patients"
  *       '401':
  *         $ref: '#/components/responses/Unauthorized'
  *       '500':
  *         $ref: '#/components/responses/InternalServerError'
  */
-export async function getServicesController (this: ServiceHttpController, req: Request, res: Response) {
+export async function getPatientsHttpController(this: PatientHttpController, req: Request, res: Response) {
   try {
     const clinicId = getAsyncLocalStorage('tenantId') as number;
 
-    const result = await this.serviceService.getServicesByClinicId(clinicId);
+    const result = await this.patientService.getPatients(clinicId);
 
     standardResponse(res, constants.HTTP_STATUS_OK, result);
   } catch (e) {
-    Logger.error('Error getting services:', (e as Error).message);
+    Logger.error('Error getting patients:', (e as Error).message);
     standardErrorResponse(res, constants.HTTP_STATUS_INTERNAL_SERVER_ERROR, e as Error);
   }
 }

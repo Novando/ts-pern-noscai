@@ -59,20 +59,6 @@ services:
     networks:
       - clinic-network
 
-  # PGAdmin (Optional)
-  pgadmin:
-    image: dpage/pgadmin4
-    container_name: pgadmin
-    environment:
-      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL:-admin@clinic.com}
-      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD:-admin}
-    ports:
-      - "5050:80"
-    depends_on:
-      - db
-    networks:
-      - clinic-network
-
 # Volumes
 volumes:
   postgres_data:

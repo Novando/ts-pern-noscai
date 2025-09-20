@@ -6,7 +6,7 @@ import dayjs from 'dayjs';
 import { useAuth } from '@/src/contexts/AuthContext';
 import { fetchServiceAvailability } from '@/src/services/schedule';
 import {AvailabilityResponse, TimeSlot} from '@/src/types/schedule';
-import { Service } from '@/src/types/service';
+import { fetchPatients, type Patient } from '@/src/services/patient';
 import { fetchDoctorsByService, Doctor } from '@/src/services/doctor';
 import { useToast } from '@/src/contexts/ToastContext';
 import { bookAppointment } from '@/src/services/appointment';
@@ -26,6 +26,8 @@ export default function ServiceAppointmentPage() {
   const [selectedDoctor, setSelectedDoctor] = useState<number | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { showSuccess, showError } = useToast();
+  const [patients, setPatients] = useState<Patient[]>([]);
+  const [selectedPatientId, setSelectedPatientId] = useState<number | ''>('');
 
   // Calculate min and max dates
   const minDate = new Date();
@@ -44,15 +46,25 @@ export default function ServiceAppointmentPage() {
     }
   }, [selectedDate, selectedDoctor]);
 
-  // const loadService = async () => {
-  //   try {
-  //     const data = await fetchServiceById(serviceId);
-  //     setService(data);
-  //   } catch (error) {
-  //     console.error('Error loading service details:', error);
-  //     setError('Failed to load service details. Please try again.');
-  //   }
-  // };
+  useEffect(() => {
+    const loadPatients = async () => {
+      try {
+        const data = await fetchPatients();
+        setPatients(data);
+      } catch (err) {
+        console.error('Failed to load patients:', err);
+        showError('Failed to load patients. Please try again.');
+      }
+    };
+
+    if (selectedClinicId) {
+      loadPatients();
+    }
+  }, [selectedClinicId, showError]);
+
+  const handlePatientChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    setSelectedPatientId(e.target.value ? Number(e.target.value) : '');
+  };
 
   const loadDoctors = async () => {
     try {
@@ -117,7 +129,7 @@ export default function ServiceAppointmentPage() {
       await bookAppointment({
         serviceId: serviceId,
         startsAt: selectedSlot.starts,
-        patientId: 1, // Using 1 as dummy patient ID
+        patientId: selectedPatientId as number,
         doctorId: availability.doctorId
       });
 
@@ -146,10 +158,6 @@ export default function ServiceAppointmentPage() {
       </div>
     );
   }
-
-  // if (!service) {
-  //   return <div>Loading service details...</div>;
-  // }
 
   return (
     <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
@@ -180,6 +188,26 @@ export default function ServiceAppointmentPage() {
           </div>
 
           <div className="mb-6">
+            <label htmlFor="patient" className="block text-sm font-medium text-gray-700 mb-2">
+              Select Patient <span className="text-red-500">*</span>
+            </label>
+            <select
+              id="patient"
+              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+              value={selectedPatientId}
+              onChange={handlePatientChange}
+              required
+            >
+              <option value="">Select a patient</option>
+              {patients.map((patient) => (
+                <option key={patient.id} value={patient.id}>
+                  {patient.name}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div className="mb-6">
             <label htmlFor="appointment-date" className="block text-sm font-medium text-gray-700 mb-2">
               Select Date
             </label>
@@ -196,8 +224,8 @@ export default function ServiceAppointmentPage() {
 
           <div>
             <h2 className="text-lg font-medium text-gray-900 mb-4">
-              Available Time Slots for {dayjs(selectedDate).format('dddd, MMMM D, YYYY')}
-              {selectedDoctor && ` with ${doctors.find(d => d.id === selectedDoctor)?.name}`}
+              Available Time Slots
+              {selectedDoctor && ` with ${timeSlots[0].doctorName}`}
             </h2>
 
             {isLoading ? (
@@ -215,7 +243,7 @@ export default function ServiceAppointmentPage() {
                 {timeSlots.flatMap(availability =>
                   availability.timeSlots.map((slot, index) => (
                     <button
-                      key={`${availability.doctorId}-${index}`}
+                      key={`${availability.doctorId}-${index}-${slot.ends}`}
                       type="button"
                       onClick={() => handleSlotSelect(slot)}
                       className={`p-4 rounded-md border hover:bg-gray-50 ${
@@ -225,8 +253,11 @@ export default function ServiceAppointmentPage() {
                       }`}
                     >
                       <div className="font-medium text-black">
+                        {dayjs(availability.date).format('D MMM YYYY')}
+                      </div>
+                      <div className="font-medium text-black">
                         {dayjs(slot.starts).format('h:mm A')} - {dayjs(slot.ends).format('h:mm A')}
-                      </div>(
+                      </div>
                       <div className="text-sm text-gray-500 mt-1">
                         Dr. {availability.doctorName}
                       </div>
@@ -249,9 +280,9 @@ export default function ServiceAppointmentPage() {
           <button
             type="button"
             onClick={handleSubmit}
-            disabled={!selectedSlot || isSubmitting}
+            disabled={!selectedSlot || !selectedPatientId || isSubmitting}
             className={`px-6 py-2 rounded-md ${
-              selectedSlot && !isSubmitting
+              !selectedSlot || !isSubmitting || !selectedPatientId
                 ? 'bg-blue-600 text-white hover:bg-blue-700'
                 : 'bg-gray-300 text-gray-500 cursor-not-allowed'
             }`}

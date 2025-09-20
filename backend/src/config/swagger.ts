@@ -12,7 +12,7 @@ export const swaggerDocument = {
   },
   servers: [
     {
-      url: 'http://localhost:3000/api',
+      url: 'http://localhost:3000/v1',
       description: 'Development server'
     },
     {
