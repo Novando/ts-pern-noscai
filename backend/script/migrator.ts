@@ -2,8 +2,6 @@ import fs from 'fs';
 import {join} from 'path';
 import {Pool} from "pg";
 import {envConfig} from "../src/configs/config.config";
-import {version} from "node:os";
-import {throws} from "assert";
 
 type MigrationAction = 'up' | 'down' | 'reset' | 'new'
 

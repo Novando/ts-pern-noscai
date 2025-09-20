@@ -2,10 +2,11 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { Clinic } from '@/app/types/clinic';
-import { fetchClinics } from '@/app/services/clinic';
+import { Clinic } from '@/src/types/clinic';
+import { fetchClinics } from '@/src/services/clinic';
 import { ClinicCard } from '@/app/components/ClinicCard';
-import { useAuth } from '@/app/contexts/AuthContext';
+import { useAuth } from '@/src/contexts/AuthContext';
+import {useToast} from "@/src/contexts/ToastContext";
 
 export default function ClinicSelectionPage() {
   const [clinics, setClinics] = useState<Clinic[]>([]);
@@ -13,6 +14,7 @@ export default function ClinicSelectionPage() {
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
   const { selectedClinicId, selectClinic } = useAuth();
+  const {showError} = useToast();
 
   // Redirect to welcome page if already authenticated
   useEffect(() => {
@@ -28,7 +30,7 @@ export default function ClinicSelectionPage() {
         setClinics(response.value.data);
         setError(null);
       } catch (err) {
-        console.error('Failed to load clinics:', err);
+        showError((err as Error).message);
         setError('Failed to load clinics. Please try again later.');
       } finally {
         setIsLoading(false);

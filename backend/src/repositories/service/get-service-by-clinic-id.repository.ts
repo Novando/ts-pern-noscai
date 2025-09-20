@@ -1,9 +1,19 @@
 import type {ServiceEntity} from "../../models/entity/service.entity";
 import {serviceQueryGetServicesByClinicId} from "./service-query.repository";
 import type {ServiceRepository} from "./service.repository";
+import {getAsyncLocalStorage} from "../../utils/local-storage.util";
 
 
 export async function getServiceByClinicIdRepository(this: ServiceRepository, clinicId: number): Promise<ServiceEntity[]> {
-  const result = await this.db.query<ServiceEntity>(serviceQueryGetServicesByClinicId, [clinicId]);
-  return result.rows;
+  const db = getAsyncLocalStorage('pgTx') ?? this.db;
+
+  const result = await db.query<ServiceEntity>(serviceQueryGetServicesByClinicId, [clinicId]);
+
+  if (result.rows.length < 1) throw Error('Service not available')
+
+  return result.rows.map((item) => ({
+    id: item.id,
+    name: item.name,
+    duration: item.duration,
+  }));
 }

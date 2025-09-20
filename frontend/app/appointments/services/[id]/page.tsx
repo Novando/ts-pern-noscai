@@ -1,17 +1,16 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useParams } from 'next/navigation';
 import dayjs from 'dayjs';
-import { useAuth } from '@/app/contexts/AuthContext';
-import { fetchServiceAvailability } from '@/app/services/schedule';
-import { TimeSlot } from '@/app/types/schedule';
+import { useAuth } from '@/src/contexts/AuthContext';
+import { fetchServiceAvailability } from '@/src/services/schedule';
+import { TimeSlot } from '@/src/types/schedule';
 
-// Mock service ID - replace with actual service selection in a real app
-const SERVICE_ID = 1;
-
-export default function NewAppointmentPage() {
+export default function ServiceAppointmentPage() {
   const router = useRouter();
+  const params = useParams();
+  const serviceId = Number(params.id);
   const { selectedClinicId } = useAuth();
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const [timeSlots, setTimeSlots] = useState<TimeSlot[]>([]);
@@ -23,16 +22,16 @@ export default function NewAppointmentPage() {
   const minDate = new Date();
   const maxDate = dayjs().add(3, 'day').toDate();
 
-  // Fetch time slots when selected date changes
+  // Fetch time slots when selected date or serviceId changes
   useEffect(() => {
     const loadTimeSlots = async () => {
-      if (!selectedClinicId) return;
+      if (!selectedClinicId || isNaN(serviceId)) return;
 
       setIsLoading(true);
       setError(null);
 
       try {
-        const response = await fetchServiceAvailability(SERVICE_ID, selectedDate);
+        const response = await fetchServiceAvailability({serviceId, selectedTime: selectedDate});
         setTimeSlots(response.value.timeSlots || []);
       } catch (err) {
         console.error('Error loading time slots:', err);
@@ -43,7 +42,7 @@ export default function NewAppointmentPage() {
     };
 
     loadTimeSlots();
-  }, [selectedDate, selectedClinicId]);
+  }, [selectedDate, selectedClinicId, serviceId]);
 
   const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSelectedDate(new Date(e.target.value));
@@ -60,14 +59,14 @@ export default function NewAppointmentPage() {
 
     // Here you would typically submit the appointment
     console.log('Selected appointment:', {
-      serviceId: SERVICE_ID,
+      serviceId,
       clinicId: selectedClinicId,
       startTime: selectedSlot.start,
       endTime: selectedSlot.end
     });
 
     // Redirect to confirmation page or next step
-    // router.push('/appointments/confirm');
+    // router.push(`/appointments/confirm?serviceId=${serviceId}&slot=${encodeURIComponent(JSON.stringify(selectedSlot))}`);
   };
 
   if (!selectedClinicId) {
@@ -155,7 +154,7 @@ export default function NewAppointmentPage() {
         <div className="flex justify-end space-x-4">
           <button
             type="button"
-            onClick={() => router.push('/welcome')}
+            onClick={() => router.back()}
             className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
           >
             Back

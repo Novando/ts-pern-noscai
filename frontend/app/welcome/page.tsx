@@ -2,7 +2,7 @@
 
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { useAuth } from '../contexts/AuthContext';
+import { useAuth } from '@/src/contexts/AuthContext';
 
 export default function WelcomePage() {
   const router = useRouter();
@@ -31,7 +31,7 @@ export default function WelcomePage() {
           <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
             <div
               className="bg-blue-50 p-6 rounded-lg border border-blue-100 hover:bg-blue-100 transition-colors cursor-pointer"
-              onClick={() => router.push('/appointments/new')}
+              onClick={() => router.push('/appointments')}
             >
               <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-blue-100 text-blue-600 mb-4">
                 <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">

@@ -5,6 +5,7 @@ import dayjs from "dayjs";
 import {constants} from "http2";
 import {standardResponse} from "../../../utils/response.util";
 import {Logger} from "../../../utils/logger.util";
+import {standardErrorResponse} from "../../../utils/error.util";
 
 export async function getDoctorBookedHttpController(this: ScheduleHttpController, req: Request, res: Response): Promise<void> {
   try {
@@ -27,12 +28,9 @@ export async function getDoctorBookedHttpController(this: ScheduleHttpController
       to,
     })
 
-    res.status(constants.HTTP_STATUS_OK).json(standardResponse(availability));
-  } catch (error) {
-    Logger.error('Error getting service availability:', error);
-    res.status(500).json({
-      error: 'Failed to get service availability',
-      details: error instanceof Error ? error.message : 'Unknown error'
-    });
+    standardResponse(res, constants.HTTP_STATUS_OK, availability);
+  } catch (e) {
+    Logger.error('Error getting service availability:', e);
+    standardErrorResponse(res, constants.HTTP_STATUS_INTERNAL_SERVER_ERROR, e as Error)
   }
 }

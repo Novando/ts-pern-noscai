@@ -4,6 +4,8 @@ import {ScheduleHttpController} from "./schedule.http.controller";
 import dayjs from "dayjs";
 import {constants} from "http2";
 import {standardResponse} from "../../../utils/response.util";
+import {Logger} from "../../../utils/logger.util";
+import {standardErrorResponse} from "../../../utils/error.util";
 
 export async function getServiceAvailabilityHttpController(this: ScheduleHttpController, req: Request, res: Response): Promise<void> {
   try {
@@ -12,7 +14,7 @@ export async function getServiceAvailabilityHttpController(this: ScheduleHttpCon
 
     // Default to now
     const selectedTime = req.query.selectedTime && dayjs(req.query.selectedTime as string).isValid()
-      ? new Date(req.query.startDate as string)
+      ? dayjs(req.query.selectedTime as string).toDate()
       : new Date();
 
     const doctorId = req.query.doctorId ? parseInt(req.query.doctorId as string) : undefined;
@@ -24,12 +26,9 @@ export async function getServiceAvailabilityHttpController(this: ScheduleHttpCon
       doctorId,
     })
 
-    res.status(constants.HTTP_STATUS_OK).json(standardResponse(availability));
-  } catch (error) {
-    console.error('Error getting service availability:', error);
-    res.status(constants.HTTP_STATUS_INTERNAL_SERVER_ERROR).json({
-      error: 'Failed to get service availability',
-      details: error instanceof Error ? error.message : 'Unknown error'
-    });
+    standardResponse(res, constants.HTTP_STATUS_OK, availability);
+  } catch (e) {
+    Logger.error('Error getting service availability:', e);
+    standardErrorResponse(res, constants.HTTP_STATUS_INTERNAL_SERVER_ERROR, e as Error)
   }
 }

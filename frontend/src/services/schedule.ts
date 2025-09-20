@@ -1,4 +1,4 @@
-import { AvailabilityApiResponse } from '@/app/types/schedule';
+import { AvailabilityApiResponse } from '@/src/types/schedule';
 import { api } from './api';
 
 export interface ServiceAvailabilityParams {

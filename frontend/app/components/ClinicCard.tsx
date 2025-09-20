@@ -1,4 +1,4 @@
-import { Clinic } from '@/app/types/clinic';
+import { Clinic } from '@/src/types/clinic';
 import React from 'react';
 
 type ClinicCardProps = {

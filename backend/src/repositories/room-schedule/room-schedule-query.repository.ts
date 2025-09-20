@@ -40,6 +40,7 @@ export const roomScheduleQueryGetMultipleRoomBusinessHoursByServiceId = `-- room
     ) AS breaks
   FROM room_schedules rs
   LEFT JOIN room_schedule_break_hours rsb ON rs.id = rsb.room_schedule_id
-  INNER JOIN services s ON rs.room_id = s.room_id WHERE s.id = $1
+  INNER JOIN services s ON rs.room_id = s.room_id AND s.id = $1
+  INNER JOIN rooms r ON r.id = rs.room_id AND r.clinic_id = $2
   GROUP BY rs.id, rs.day_of_week, rs.starts_at, rs.ends_at
 `

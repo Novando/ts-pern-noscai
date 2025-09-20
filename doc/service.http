@@ -1,0 +1,3 @@
+### Get all services based on selected clinic
+GET http://localhost:3000/v1/services
+#X-Tenant-Id: 1  # Example tenant ID

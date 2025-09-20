@@ -6,6 +6,7 @@ import Joi from "joi";
 import type {ScheduleEntity} from "../../models/entity/common.entity";
 import type {GetAppointmentsByServiceIdEntity} from "../../models/entity/appointment.entity";
 import dayjs from "dayjs";
+import {Logger} from "../../utils/logger.util";
 
 const schema = Joi.object<GetServiceAvailabilityDTOReq>({
   clinicId: Joi.number().min(1).required(),
@@ -24,7 +25,7 @@ export async function searchAvailabilityService(this: ScheduleService, param: Ge
     const [clinicSchedules, doctorSchedules, roomSchedules, appointments] = await Promise.all([
       this.clinicScheduleRepository.getClinicBusinessHours(clinicId),
       this.doctorScheduleRepository.getMultipleDoctorBusinessHoursByServiceId(serviceId, clinicId, doctorId),
-      this.roomScheduleRepository.getMultipleRoomBusinessHoursByServiceId(serviceId),
+      this.roomScheduleRepository.getMultipleRoomBusinessHoursByServiceId(serviceId, clinicId),
       this.appointmentRepository.getAppointmentByServiceId(serviceId, clinicId, selectedTime, dayjs(param.selectedTime).add(7, 'days').toDate())
     ]);
 

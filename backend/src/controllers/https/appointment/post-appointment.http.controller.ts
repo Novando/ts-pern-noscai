@@ -14,9 +14,9 @@ export async function postAppointmentHttpController(this: AppointmentHttpControl
     param.clinicId = getAsyncLocalStorage('tenantId') as number
     const result = await this.appointmentService.createAppointment(param)
 
-    return res.status(constants.HTTP_STATUS_OK).json(standardResponse(result))
+    standardResponse(res, constants.HTTP_STATUS_OK, result)
   } catch (e) {
     Logger.error(e as Error)
-    standardErrorResponse(res, e as Error)
+    standardErrorResponse(res, constants.HTTP_STATUS_INTERNAL_SERVER_ERROR, e as Error)
   }
 }

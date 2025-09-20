@@ -13,15 +13,11 @@ export class AppError extends Error {
   }
 }
 
-export function standardErrorResponse(res: Response, e: Error) {
+export function standardErrorResponse(res: Response, code: number, e: Error) {
   if (e instanceof AppError) {
-    res.status(e.status).json(
-      standardResponse(null, e.code, e.message)
-    );
+    return standardResponse(res, e.status, null, e.code, e.message);
   } else {
     // Fallback for unknown errors
-    res.status(500).json(
-      standardResponse(null, "INTERNAL_ERROR", "Something went wrong")
-    );
+    return standardResponse(res, code, null, "INTERNAL_ERROR", "Something went wrong");
   }
 }

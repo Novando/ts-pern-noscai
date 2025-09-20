@@ -1,4 +1,4 @@
-import { ApiResponse, ListResponse } from '@/app/types/clinic';
+import { ApiResponse, ListResponse } from '@/src/types/clinic';
 import { api } from './api';
 
 export interface Clinic {
@@ -10,7 +10,6 @@ export async function fetchClinics(): Promise<ApiResponse<ListResponse<Clinic>>>
   try {
     return api.get<ApiResponse<ListResponse<Clinic>>>('/clinics');
   } catch (error) {
-    console.error('Failed to fetch clinics:', error);
     throw error;
   }
 }

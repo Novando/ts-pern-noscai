@@ -4,6 +4,7 @@ import {getAsyncLocalStorage} from "../../../utils/local-storage.util";
 import {Logger} from "../../../utils/logger.util";
 import {constants} from "http2";
 import {standardResponse} from "../../../utils/response.util";
+import {standardErrorResponse} from "../../../utils/error.util";
 export async function deleteAppointmentHttpController(
   this: AppointmentHttpController,
   req: Request,
@@ -15,12 +16,9 @@ export async function deleteAppointmentHttpController(
 
     const result = await this.appointmentService.cancelAppointment(appointmentId, clinicId);
 
-    return res.status(constants.HTTP_STATUS_OK).json(standardResponse(result));
+    standardResponse(res, constants.HTTP_STATUS_OK, result);
   } catch (e) {
     Logger.error('Error getting service availability:', e);
-    res.status(constants.HTTP_STATUS_INTERNAL_SERVER_ERROR).json({
-      error: 'Failed to get service availability',
-      details: e instanceof Error ? e.message : 'Unknown error'
-    });
+    standardErrorResponse(res, constants.HTTP_STATUS_INTERNAL_SERVER_ERROR, e as Error)
   }
 }

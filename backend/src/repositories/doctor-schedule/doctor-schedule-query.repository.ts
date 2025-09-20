@@ -43,10 +43,11 @@ export function doctorScheduleQueryGetMultipleDoctorBusinessHoursByServiceId (wh
     FROM doctor_schedules ds
     LEFT JOIN doctor_schedule_break_hours dsb ON ds.id = dsb.doctor_schedule_id
     INNER JOIN doctor_services doc_ser ON ds.doctor_id = doc_ser.doctor_id AND doc_ser.service_id = $1
-    INNER JOIN rooms r ON r.service_id = doc_ser.service_id AND r.clinic_id = $2
-    INNER JOIN doctor d ON ds.doctor_id = d.id
+    INNER JOIN services s ON s.id = doc_ser.service_id
+    INNER JOIN rooms r ON r.id = s.room_id AND r.clinic_id = $2
+    INNER JOIN doctors d ON d.id = ds.doctor_id
     WHERE 1=1
     ${whereCond.join("\n    ")}
-    GROUP BY ds.id, ds.day_of_week, ds.starts_at, ds.ends_at
+    GROUP BY d.id, ds.day_of_week, ds.starts_at, ds.ends_at
   `
 }

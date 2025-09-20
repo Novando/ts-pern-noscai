@@ -23,7 +23,7 @@ export function deleteCookie(name: string) {
   document.cookie = `${name}=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT;`;
 }
 
-export function getTenantIdFromCookie(): string | null {
+export function getClinicIdFromCookie(): string | null {
   if (typeof document === 'undefined') {
     // Handle server-side rendering
     return null;
@@ -31,7 +31,7 @@ export function getTenantIdFromCookie(): string | null {
 
   const cookieValue = document.cookie
     .split('; ')
-    .find(row => row.startsWith('tenantId='))
+    .find(row => row.startsWith('clinicId='))
     ?.split('=')[1];
 
   return cookieValue || null;

@@ -23,7 +23,7 @@ export class RouteHttpController {
     // this.router.use(guardMiddleware)
     this.router.post('/appointments', guardMiddleware, param.appointmentController.postAppointment.bind(this.param.appointmentController)); // create booking
     this.router.delete('/appointments/:id', guardMiddleware, param.appointmentController.deleteAppointment.bind(this.param.appointmentController));
-    this.router.get('/services', guardMiddleware, param.serviceController.getService)
+    this.router.get('/services', guardMiddleware, param.serviceController.getService.bind(this.param.serviceController))
     this.router.get('/schedules/services/:id/availability', guardMiddleware, param.scheduleController.getServiceAvailability.bind(this.param.scheduleController)); // get service availability
     this.router.get('/schedules/doctors/:id/booked', guardMiddleware, param.scheduleController.getDoctorBooked.bind(this.param.scheduleController)); // list doctor’s appointments for calendar view
   }
