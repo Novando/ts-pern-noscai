@@ -8,7 +8,7 @@ export async function getClinicsHttpController(this: ClinicHttpController, req: 
   try {
     const clinics = await this.clinicService.getClinics()
 
-    res.status(constants.HTTP_STATUS_OK).json(standardResponse(clinics));
+    return res.status(constants.HTTP_STATUS_OK).json(standardResponse(clinics));
   } catch (error) {
     Logger.error('Error getting service availability:', error);
     res.status(500).json({

@@ -20,7 +20,7 @@ export async function getDoctorBookedHttpController(this: ScheduleHttpController
       ? new Date(req.query.to as string)
       : dayjs(from).add(3, 'days').toDate();
 
-    const availability = await this.scheduleService.bookedSchedule({
+    const availability = await this.scheduleService.doctorBookedSchedule({
       doctorId,
       clinicId,
       from,
