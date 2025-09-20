@@ -1,16 +1,15 @@
-import { ApiResponse } from './clinic';
+import {ApiResponse, ListResponse} from './clinic';
 
 export interface TimeSlot {
-  start: string;
-  end: string;
-  available: boolean;
+  starts: string;
+  ends: string;
 }
 
 export interface AvailabilityResponse {
-  serviceId: number;
-  clinicId: number;
+  doctorName: number;
+  doctorId: number;
   date: string;
   timeSlots: TimeSlot[];
 }
 
-export type AvailabilityApiResponse = ApiResponse<AvailabilityResponse>;
+export type AvailabilityApiResponse = ApiResponse<ListResponse<AvailabilityResponse>>;

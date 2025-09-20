@@ -5,7 +5,11 @@ import { useRouter, useParams } from 'next/navigation';
 import dayjs from 'dayjs';
 import { useAuth } from '@/src/contexts/AuthContext';
 import { fetchServiceAvailability } from '@/src/services/schedule';
-import { TimeSlot } from '@/src/types/schedule';
+import {AvailabilityResponse, TimeSlot} from '@/src/types/schedule';
+import { Service } from '@/src/types/service';
+import { fetchDoctorsByService, Doctor } from '@/src/services/doctor';
+import { useToast } from '@/src/contexts/ToastContext';
+import { bookAppointment } from '@/src/services/appointment';
 
 export default function ServiceAppointmentPage() {
   const router = useRouter();
@@ -13,60 +17,118 @@ export default function ServiceAppointmentPage() {
   const serviceId = Number(params.id);
   const { selectedClinicId } = useAuth();
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
-  const [timeSlots, setTimeSlots] = useState<TimeSlot[]>([]);
+  const [timeSlots, setTimeSlots] = useState<AvailabilityResponse[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedSlot, setSelectedSlot] = useState<TimeSlot | null>(null);
+  // const [service, setService] = useState<Service | null>(null);
+  const [doctors, setDoctors] = useState<Doctor[]>([]);
+  const [selectedDoctor, setSelectedDoctor] = useState<number | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const { showSuccess, showError } = useToast();
 
   // Calculate min and max dates
   const minDate = new Date();
-  const maxDate = dayjs().add(3, 'day').toDate();
+  const maxDate = dayjs().add(30, 'day').toDate();
 
-  // Fetch time slots when selected date or serviceId changes
   useEffect(() => {
-    const loadTimeSlots = async () => {
-      if (!selectedClinicId || isNaN(serviceId)) return;
+    if (serviceId && selectedClinicId) {
+      loadAvailability();
+      loadDoctors();
+    }
+  }, [serviceId, selectedClinicId]);
 
-      setIsLoading(true);
-      setError(null);
+  useEffect(() => {
+    if (selectedDate) {
+      loadAvailability();
+    }
+  }, [selectedDate, selectedDoctor]);
 
-      try {
-        const response = await fetchServiceAvailability({serviceId, selectedTime: selectedDate});
-        setTimeSlots(response.value.timeSlots || []);
-      } catch (err) {
-        console.error('Error loading time slots:', err);
-        setError('Failed to load available time slots. Please try again.');
-      } finally {
-        setIsLoading(false);
-      }
-    };
+  // const loadService = async () => {
+  //   try {
+  //     const data = await fetchServiceById(serviceId);
+  //     setService(data);
+  //   } catch (error) {
+  //     console.error('Error loading service details:', error);
+  //     setError('Failed to load service details. Please try again.');
+  //   }
+  // };
 
-    loadTimeSlots();
-  }, [selectedDate, selectedClinicId, serviceId]);
+  const loadDoctors = async () => {
+    try {
+      const data = await fetchDoctorsByService(serviceId);
+      setDoctors(data);
+    } catch (error) {
+      console.error('Error loading doctors:', error);
+      setError('Failed to load doctors. Please try again.');
+    }
+  };
+
+  const loadAvailability = async () => {
+    if (!selectedClinicId) return;
+
+    setIsLoading(true);
+    try {
+      const response = await fetchServiceAvailability({
+        serviceId,
+        selectedTime: selectedDate,
+        doctorId: selectedDoctor || undefined
+      });
+      setTimeSlots(response.value.data || []);
+    } catch (err) {
+      console.error('Error loading time slots:', err);
+      setError('Failed to load available time slots. Please try again.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSelectedDate(new Date(e.target.value));
     setSelectedSlot(null);
   };
 
+  const handleDoctorChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const doctorId = e.target.value ? parseInt(e.target.value) : null;
+    setSelectedDoctor(doctorId);
+  };
+
   const handleSlotSelect = (slot: TimeSlot) => {
     setSelectedSlot(slot);
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!selectedSlot) return;
+  const handleSubmit = async () => {
+    if (!selectedSlot || !selectedClinicId) return;
 
-    // Here you would typically submit the appointment
-    console.log('Selected appointment:', {
-      serviceId,
-      clinicId: selectedClinicId,
-      startTime: selectedSlot.start,
-      endTime: selectedSlot.end
-    });
+    setIsSubmitting(true);
+    try {
+      // Find the availability that contains the selected slot
+      const availability = timeSlots.find(avail => 
+        avail.timeSlots.some(slot => 
+          slot.starts === selectedSlot.starts && 
+          slot.ends === selectedSlot.ends
+        )
+      );
 
-    // Redirect to confirmation page or next step
-    // router.push(`/appointments/confirm?serviceId=${serviceId}&slot=${encodeURIComponent(JSON.stringify(selectedSlot))}`);
+      if (!availability) {
+        throw new Error('Selected time slot is no longer available');
+      }
+
+      await bookAppointment({
+        serviceId: serviceId,
+        startsAt: selectedSlot.starts,
+        patientId: 1, // Using 1 as dummy patient ID
+        doctorId: availability.doctorId
+      });
+
+      showSuccess('Appointment booked successfully!');
+      router.push('/appointments'); // Redirect to appointments page
+    } catch (error) {
+      console.error('Error booking appointment:', error);
+      showError('Failed to book appointment. Please try again.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   if (!selectedClinicId) {
@@ -85,6 +147,10 @@ export default function ServiceAppointmentPage() {
     );
   }
 
+  // if (!service) {
+  //   return <div>Loading service details...</div>;
+  // }
+
   return (
     <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-3xl mx-auto">
@@ -94,6 +160,25 @@ export default function ServiceAppointmentPage() {
         </div>
 
         <div className="bg-white shadow rounded-lg p-6 mb-8">
+          <div className="mb-6">
+            <label htmlFor="doctor" className="block text-sm font-medium text-gray-700 mb-2">
+              Select Doctor (Optional)
+            </label>
+            <select
+              id="doctor"
+              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+              value={selectedDoctor || ''}
+              onChange={handleDoctorChange}
+            >
+              <option value="">Any Available Doctor</option>
+              {doctors.map((doctor) => (
+                <option key={doctor.id} value={doctor.id}>
+                  {doctor.name}
+                </option>
+              ))}
+            </select>
+          </div>
+
           <div className="mb-6">
             <label htmlFor="appointment-date" className="block text-sm font-medium text-gray-700 mb-2">
               Select Date
@@ -112,6 +197,7 @@ export default function ServiceAppointmentPage() {
           <div>
             <h2 className="text-lg font-medium text-gray-900 mb-4">
               Available Time Slots for {dayjs(selectedDate).format('dddd, MMMM D, YYYY')}
+              {selectedDoctor && ` with ${doctors.find(d => d.id === selectedDoctor)?.name}`}
             </h2>
 
             {isLoading ? (
@@ -126,26 +212,27 @@ export default function ServiceAppointmentPage() {
               </div>
             ) : (
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
-                {timeSlots.map((slot, index) => (
-                  <button
-                    key={index}
-                    type="button"
-                    onClick={() => handleSlotSelect(slot)}
-                    disabled={!slot.available}
-                    className={`p-4 rounded-md border ${
-                      selectedSlot?.start === slot.start
-                        ? 'bg-blue-50 border-blue-500 ring-2 ring-blue-200'
-                        : 'border-gray-200 hover:border-blue-300'
-                    } ${!slot.available ? 'opacity-50 cursor-not-allowed' : 'hover:bg-gray-50'}`}
-                  >
-                    <div className="font-medium">
-                      {dayjs(slot.start).format('h:mm A')} - {dayjs(slot.end).format('h:mm A')}
-                    </div>
-                    {!slot.available && (
-                      <div className="text-xs text-red-600 mt-1">Booked</div>
-                    )}
-                  </button>
-                ))}
+                {timeSlots.flatMap(availability =>
+                  availability.timeSlots.map((slot, index) => (
+                    <button
+                      key={`${availability.doctorId}-${index}`}
+                      type="button"
+                      onClick={() => handleSlotSelect(slot)}
+                      className={`p-4 rounded-md border hover:bg-gray-50 ${
+                        selectedSlot?.starts === slot.starts
+                          ? 'bg-blue-50 border-blue-500 ring-2 ring-blue-200'
+                          : 'border-gray-200 hover:border-blue-300'
+                      }`}
+                    >
+                      <div className="font-medium text-black">
+                        {dayjs(slot.starts).format('h:mm A')} - {dayjs(slot.ends).format('h:mm A')}
+                      </div>(
+                      <div className="text-sm text-gray-500 mt-1">
+                        Dr. {availability.doctorName}
+                      </div>
+                    </button>
+                  ))
+                )}
               </div>
             )}
           </div>
@@ -162,14 +249,14 @@ export default function ServiceAppointmentPage() {
           <button
             type="button"
             onClick={handleSubmit}
-            disabled={!selectedSlot}
+            disabled={!selectedSlot || isSubmitting}
             className={`px-6 py-2 rounded-md ${
-              selectedSlot
+              selectedSlot && !isSubmitting
                 ? 'bg-blue-600 text-white hover:bg-blue-700'
                 : 'bg-gray-300 text-gray-500 cursor-not-allowed'
             }`}
           >
-            Continue
+            {isSubmitting ? 'Booking...' : 'Continue'}
           </button>
         </div>
       </div>

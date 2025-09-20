@@ -1,0 +1,83 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  db:
+    image: postgres:15-alpine
+    container_name: clinic_db
+    environment:
+      POSTGRES_USER: ${DB_USER:-postgres}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-postgres}
+      POSTGRES_DB: ${DB_NAME:-clinic}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./db/init:/docker-entrypoint-initdb.d
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-postgres} -d ${DB_NAME:-clinic}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - clinic-network
+
+  # Backend API Service
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: clinic_backend
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      - NODE_ENV=production
+      - DATABASE_URL=postgresql://${DB_USER:-postgres}:${DB_PASSWORD:-postgres}@db:5432/${DB_NAME:-clinic}
+      - JWT_SECRET=${JWT_SECRET:-your_jwt_secret}
+      - PORT=3000
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./backend:/app
+      - /app/node_modules
+    networks:
+      - clinic-network
+
+  # Frontend Service
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: clinic_frontend
+    depends_on:
+      - backend
+    ports:
+      - "80:80"
+    environment:
+      - NEXT_PUBLIC_API_URL=http://localhost:3000
+    networks:
+      - clinic-network
+
+  # PGAdmin (Optional)
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: pgadmin
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL:-admin@clinic.com}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD:-admin}
+    ports:
+      - "5050:80"
+    depends_on:
+      - db
+    networks:
+      - clinic-network
+
+# Volumes
+volumes:
+  postgres_data:
+
+# Networks
+networks:
+  clinic-network:
+    driver: bridge

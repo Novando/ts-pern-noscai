@@ -76,7 +76,6 @@ function getDefaultHeaders(options: RequestOptions): HeadersInit {
   // Add tenant ID header if not explicitly skipped
   if (!options.skipTenantHeader) {
     const tenantId = getClinicIdFromCookie();
-    console.log(tenantId);
     if (tenantId) {
       headers['x-tenant-id'] = tenantId;
     }

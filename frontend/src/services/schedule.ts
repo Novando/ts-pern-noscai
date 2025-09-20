@@ -1,9 +1,11 @@
 import { AvailabilityApiResponse } from '@/src/types/schedule';
 import { api } from './api';
+import {ListResponse} from "@/src/types/clinic";
 
 export interface ServiceAvailabilityParams {
   serviceId: number;
   selectedTime?: Date;
+  doctorId?: number;
 }
 
 export async function fetchServiceAvailability(
@@ -18,7 +20,7 @@ export async function fetchServiceAvailability(
         params: selectedTime ? { selectedTime: selectedTime.toISOString() } : undefined,
       }
     );
-    
+
     return response;
   } catch (error) {
     console.error('Failed to fetch service availability:', error);
