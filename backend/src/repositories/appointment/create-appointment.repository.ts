@@ -15,9 +15,11 @@ export async function createAppointmentRepository(this: AppointmentRepository, p
       appointmentQueryCreateAppointment,
       [param.doctorServiceId, param.patientId, param.roomId, param.startsAt.toISOString(), param.endsAt.toISOString()],
     )
+
     if ((res.rowCount || 0) < 1) throw new AppError('Appointment creation fail')
   } catch (e) {
     const err = e as Error
+
     Logger.error('createAppointmentRepository', err.message)
     if (err.message.includes('chk_appointments_doctor_service_id_time_range')) throw new AppError('Doctor schedule conflict', 'CONFLIX', constants.HTTP_STATUS_CONFLICT)
     if (err.message.includes('chk_appointments_patient_id_time_range')) throw new AppError('Patient schedule conflict', 'CONFLIX', constants.HTTP_STATUS_CONFLICT)

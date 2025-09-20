@@ -9,6 +9,7 @@ export function defaultStorageMiddleware(req: Request, res: Response, next: Next
     endpoint: `[${req.method}] ${req.url}`,
   }
   const xTenantId = req.header('x-tenant-id')
+
   if (xTenantId) {
     store.tenantId = parseInt(xTenantId);
   }

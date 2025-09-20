@@ -16,6 +16,7 @@ export async function cancelAppointmentService(
 
   // Attempt to cancel the appointment
   const deletedCount = await this.appointmentRepository.cancelAppointment(appointmentId, clinicId);
+
   if (deletedCount === 0) throw new Error('Appointment not found or does not belong to this clinic');
 
   return;

@@ -16,6 +16,7 @@ export async function getClinicBusinessHoursRepository(this: ClinicScheduleRepos
       clinicScheduleQueryGetClinicBusinessHours,
       [id],
     )
+
     if (res.rows.length < 1) throw new AppError('Clinic schedule unavailable', 'NOT_FOUND', constants.HTTP_STATUS_NOT_FOUND)
 
     return res.rows.map<ScheduleEntity>((item) => ({

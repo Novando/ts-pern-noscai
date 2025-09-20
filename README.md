@@ -42,7 +42,7 @@ docker-compose up --build
 This will start all services:
 - Frontend: http://localhost
 - Backend API: http://localhost:3000
-- API Documentation: http://localhost:3000/api-docs
+- API Documentation: http://localhost:3000/v1/api-docs
 - PostgreSQL: localhost:5432
 
 ## Development
@@ -63,7 +63,10 @@ This will start all services:
    docker-compose up -d db
 
    # Run migrations
-   npm run migrate:up
+   npm migrate up
+   
+   # Seed DB
+   npm migrate up seed
    ```
 
 3. Start the development server:
@@ -88,23 +91,7 @@ This will start all services:
 
 ### API Documentation
 
-API documentation is available at `/api-docs` when the backend is running. This interactive documentation is generated from the JSDoc comments in the controllers.
-
-## Testing
-
-### Backend Tests
-
-```bash
-cd backend
-npm test
-```
-
-### Frontend Tests
-
-```bash
-cd frontend
-npm test
-```
+API documentation is available at `/v1/api-docs` when the backend is running. This interactive documentation is generated from the JSDoc comments in the controllers.
 
 ## Deployment
 
@@ -142,7 +129,3 @@ Required environment variables are documented in `.env.example`. Make sure to se
 ├── docker-compose.yml     # Development Docker Compose
 └── .env.example          # Example environment variables
 ```
-
-## License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.

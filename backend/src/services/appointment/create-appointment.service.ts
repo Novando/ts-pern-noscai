@@ -27,6 +27,7 @@ export async function createAppointmentService(this: AppointmentService, param: 
       const statsAt = dayjs(startsAt)
       const endsAt = statsAt.add(duration, 'minutes')
       const day = statsAt.day()
+
       if (day !== dayjs(endsAt).day()) throw Error('Intraday not permitted')
 
       // Check clinic working hour

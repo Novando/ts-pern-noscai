@@ -13,7 +13,8 @@ RUN npm ci
 COPY . .
 
 # Build the application
-RUN npm run migrate -- up
+RUN npm migrate up
+RUN npm migrate up seed
 RUN npm run build
 
 # Production stage

@@ -1,4 +1,3 @@
-import {Pool} from 'pg';
 import {getAsyncLocalStorage} from '../../utils/local-storage.util';
 import type {BookedAppointmentDTORes} from '../../models/dto/response/doctor-schedule.dto.response';
 import type {AppointmentRepository} from "./appointment.repository";

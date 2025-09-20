@@ -15,6 +15,7 @@ export async function getMultipleRoomBusinessHoursByServiceIdRepository(this: Ro
       roomScheduleQueryGetMultipleRoomBusinessHoursByServiceId,
       [serviceId, clinicId],
     )
+
     if (res.rows.length < 1) throw new AppError('Room schedule unavailable', 'NOT_FOUND', constants.HTTP_STATUS_NOT_FOUND)
 
     return res.rows.map<ScheduleEntity>((item) => ({

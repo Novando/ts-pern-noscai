@@ -1,6 +1,5 @@
 import winston from 'winston'
 import dayjs from 'dayjs'
-import { getAllAsyncLocalStorage } from "./local-storage.util";
 
 
 export class Logger {
@@ -31,6 +30,7 @@ export class Logger {
 
   private jsonizeObject(...msgs: any) {
     const newMsgs: any = []
+
     for (const msg of msgs) {
       if (typeof msg === 'object') {
         newMsgs.push(JSON.stringify(msg))
@@ -38,6 +38,7 @@ export class Logger {
         newMsgs.push(msg)
       }
     }
+
     return newMsgs
   }
 

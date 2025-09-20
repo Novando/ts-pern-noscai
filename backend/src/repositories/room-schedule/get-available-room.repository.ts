@@ -15,6 +15,7 @@ export async function getAvailableRoomRepository(this: RoomScheduleRepository, p
       roomScheduleQueryCheckWorkingHour,
       [param.roomIds, param.day, param.startsAt, param.endsAt],
     )
+
     if (res.rows.length < 1) throw new AppError('All rooms unavailable', 'NOT_AVAILABLE', constants.HTTP_STATUS_NOT_FOUND)
 
     return res.rows[0]['id'] as number

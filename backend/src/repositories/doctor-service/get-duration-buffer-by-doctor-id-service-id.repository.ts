@@ -17,6 +17,7 @@ export async function getDurationBufferByDoctorIdServiceIdRepository(
     const db = getAsyncLocalStorage('pgTx') ?? this.db;
 
     const res = await db.query(doctorServiceQueryCheckDoctorService, [doctorId, serviceId, clinicId])
+
     if (res.rows.length < 1) throw new AppError('Doctor service not exists', 'NOT_FOUND', constants.HTTP_STATUS_NOT_FOUND)
 
     return {

@@ -27,9 +27,11 @@ export function runWithStore<T>(store: Store, fn: () => T): T {
  */
 export function getAllAsyncLocalStorage(): Omit<Store, 'pgTx'> | undefined  {
   const store = asyncLocalStorage.getStore();
+
   if (!store) return undefined;
 
-  const { pgTx, ...rest } = store;
+  const { ...rest } = store;
+
   return rest;
 }
 

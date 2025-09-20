@@ -6,19 +6,18 @@ import Joi from "joi";
 import type {ScheduleEntity} from "../../models/entity/common.entity";
 import type {GetAppointmentsByServiceIdEntity} from "../../models/entity/appointment.entity";
 import dayjs from "dayjs";
-import {Logger} from "../../utils/logger.util";
-
-const schema = Joi.object<GetServiceAvailabilityDTOReq>({
-  clinicId: Joi.number().min(1).required(),
-  serviceId: Joi.number().min(1).required(),
-  doctorId: Joi.number().min(1).optional(),
-  selectedTime: Joi.date().required(),
-})
 
 export async function searchAvailabilityService(
   this: ScheduleService,
   param: GetServiceAvailabilityDTOReq
 ): Promise<GetServiceAvailabilityDTORes[]> {
+
+  const schema = Joi.object<GetServiceAvailabilityDTOReq>({
+    clinicId: Joi.number().min(1).required(),
+    serviceId: Joi.number().min(1).required(),
+    doctorId: Joi.number().min(1).optional(),
+    selectedTime: Joi.date().required(),
+  })
   const { clinicId, serviceId, selectedTime, doctorId } = await schema.validateAsync(param);
   const selectedDateTime = dayjs(selectedTime);
 
@@ -78,6 +77,7 @@ export async function searchAvailabilityService(
 
         // Add only the number of slots needed to reach maxSlots
         const slotsToAdd = slotsWithDoctor.slice(0, maxSlots - slotsFound);
+
         if (slotsToAdd.length > 0) {
           availableSlots.push({
             date: currentDate.toDate(),
@@ -104,16 +104,19 @@ function groupSchedulesByDayAndDoctor(
   // First, group doctor schedules by day
   doctorSchedules.forEach(schedule => {
     const day = schedule.dayOfWeek;
+
     if (!schedulesByDay[day]) {
       schedulesByDay[day] = [];
     }
 
     // Find matching clinic schedule
     const clinicSchedule = clinicSchedules.find(cs => cs.dayOfWeek === day);
+
     if (!clinicSchedule) return; // Skip if clinic is closed
 
     // Find matching room schedule
     const roomSchedule = roomSchedules.find(rs => rs.dayOfWeek === day);
+
     if (!roomSchedule) return; // Skip if room is not available
 
     // Calculate intersection of all schedules
@@ -188,6 +191,7 @@ function calculateAvailableSlots(
       const isDuringBreak = schedule.breaks?.some(brk => {
         const breakStart = dayjs(brk.startsAt);
         const breakEnd = dayjs(brk.endsAt);
+
         return (
           (currentSlotStart.isAfter(breakStart) && currentSlotStart.isBefore(breakEnd)) ||
           (slotEnd.isAfter(breakStart) && slotEnd.isBefore(breakEnd)) ||
@@ -200,6 +204,7 @@ function calculateAvailableSlots(
       const isBooked = appointments.some(apt => {
         const aptStart = dayjs(apt.timeRange.start);
         const aptEnd = dayjs(apt.timeRange.end);
+
         return (
           (currentSlotStart.isAfter(aptStart) && currentSlotStart.isBefore(aptEnd)) ||
           (slotEnd.isAfter(aptStart) && slotEnd.isBefore(aptEnd)) ||
@@ -215,6 +220,7 @@ function calculateAvailableSlots(
         
         // Calculate the next occurrence of this day of week
         let slotDate = selectedDayjs.day(scheduleDay);
+
         if (slotDate.isBefore(selectedDayjs, 'day')) {
           // If the day has already passed this week, get next week's date
           slotDate = slotDate.add(1, 'week');

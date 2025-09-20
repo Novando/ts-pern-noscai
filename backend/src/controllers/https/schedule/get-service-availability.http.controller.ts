@@ -6,7 +6,6 @@ import {constants} from "http2";
 import {standardResponse} from "../../../utils/response.util";
 import {Logger} from "../../../utils/logger.util";
 import {standardErrorResponse} from "../../../utils/error.util";
-import {convertTz} from "../../../utils/date-converter.util";
 
 /**
  * @swagger

@@ -16,10 +16,11 @@ export function standardResponse<T>(
   resCode: string = 'OK',
   message: string = 'Success',
 ) {
-  // @ts-ignore
+  // @ts-expect-error
   value = convertTz(value)
   if (JSON.stringify(value).startsWith('[')) {
     value = {data: value} as {data: T[]}
   }
+
   return res.status(code).json({code: resCode, message, value})
 }

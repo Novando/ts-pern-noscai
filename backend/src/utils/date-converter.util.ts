@@ -24,6 +24,7 @@ export function convertTz<T extends Record<string, any> | any[]>(obj: T, timezon
       } else if (item && typeof item === 'object') {
         return convertTz(item, timezone);
       }
+
       return item;
     }) as unknown as T;
   }
@@ -32,7 +33,7 @@ export function convertTz<T extends Record<string, any> | any[]>(obj: T, timezon
 
   for (const key in result) {
     if (result[key] instanceof Date) {
-      // @ts-ignore
+      // @ts-expect-error
       result[key] = dayjs(result[key]).tz('Europe/Berlin').format();
     } else if (result[key] && typeof result[key] === 'object') {
       result[key] = convertTz(result[key], timezone);

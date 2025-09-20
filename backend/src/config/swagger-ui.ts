@@ -24,7 +24,7 @@ function getTsFiles(dir: string, fileList: string[] = []): string[] {
 }
 
 // Get all controller files
-// @ts-ignore
+// @ts-expect-error
 const controllersPath = path.join(import.meta.dirname, '../controllers');
 const apiFiles = getTsFiles(controllersPath);
 

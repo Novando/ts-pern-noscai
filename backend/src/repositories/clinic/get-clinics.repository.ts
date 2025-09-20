@@ -5,6 +5,7 @@ import {constants} from "http2";
 
 export async function getClinicsRepository(this: ClinicRepository) {
   const result = await this.db.query(clinicQueryGetClinics);
+
   if (result.rows.length < 1) throw new AppError('Clinic not found', 'NOT_FOUND', constants.HTTP_STATUS_NOT_FOUND)
 
   return result.rows.map((item) => ({

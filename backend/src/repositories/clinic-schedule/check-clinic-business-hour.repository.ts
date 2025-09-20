@@ -15,6 +15,7 @@ export async function checkClinicBusinessHourRepository(this: ClinicScheduleRepo
       clinicScheduleQueryCheckBusinessHour,
       [param.clinicId, param.day, param.startsAt, param.endsAt],
     )
+
     if (res.rows.length < 1) throw new AppError('Clinic schedule unavailable', 'CONFLIX', constants.HTTP_STATUS_CONFLICT)
   } catch (e) {
     Logger.error('checkClinicBusinessHourRepository', (e as Error).message)

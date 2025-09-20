@@ -94,6 +94,7 @@ import {constants} from "http2";
 export async function postAppointmentHttpController(this: AppointmentHttpController, req: Request, res: Response) {
   try {
     const param: PostAppointmentDTOReq = req.body
+
     param.clinicId = getAsyncLocalStorage('tenantId') as number
     const result = await this.appointmentService.createAppointment(param)
 
